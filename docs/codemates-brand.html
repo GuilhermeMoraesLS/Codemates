@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codemates — Brand Identity</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0A0E1A;
+    --bg2:      #0F1525;
+    --bg3:      #151C30;
+    --border:   #1E2D4A;
+    --green:    #00FF94;
+    --green2:   #00CC76;
+    --cyan:     #00D4FF;
+    --purple:   #8B5CF6;
+    --text:     #E2E8F0;
+    --muted:    #64748B;
+    --mono:     'JetBrains Mono', monospace;
+    --sans:     'Space Grotesk', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grid bg */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(0,255,148,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,148,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap { max-width:1100px; margin:0 auto; padding:60px 32px; position:relative; z-index:1; }
+
+  /* section */
+  .section { margin-bottom:80px; }
+  .section-label {
+    font-family: var(--mono);
+    font-size:11px;
+    color: var(--green);
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  .section-title {
+    font-size:22px;
+    font-weight:600;
+    color: var(--text);
+    margin-bottom:32px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; padding:80px 0 60px;
+  }
+
+  /* LOGO MARK */
+  .logo-mark {
+    width:96px; height:96px;
+    background: var(--bg3);
+    border:1px solid var(--border);
+    border-radius:20px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    margin-bottom:28px;
+    box-shadow: 0 0 40px rgba(0,255,148,.08), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .logo-mark::before {
+    content:'';
+    position:absolute; inset:-1px;
+    border-radius:21px;
+    background: linear-gradient(135deg, rgba(0,255,148,.3), transparent 60%);
+    z-index:-1;
+  }
+  .logo-glyph {
+    font-family: var(--mono);
+    font-size:32px;
+    font-weight:800;
+    color: var(--green);
+    letter-spacing:-.04em;
+    text-shadow: 0 0 20px rgba(0,255,148,.5);
+    line-height:1;
+  }
+  .logo-dot {
+    width:6px; height:6px;
+    background: var(--green);
+    border-radius:50%;
+    position:absolute;
+    bottom:12px; right:12px;
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+  .logo-wordmark {
+    font-family: var(--mono);
+    font-size:42px;
+    font-weight:700;
+    letter-spacing:-.04em;
+    color: var(--text);
+    margin-bottom:8px;
+  }
+  .logo-wordmark span { color: var(--green); }
+
+  .logo-tagline {
+    font-family: var(--mono);
+    font-size:13px;
+    color: var(--muted);
+    letter-spacing:.05em;
+  }
+  .logo-tagline em { color: var(--green); font-style:normal; }
+
+  /* ── LOGO VARIANTS ── */
+  .logo-grid {
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap:16px;
+    margin-top:8px;
+  }
+
+  .logo-card {
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:40px 24px;
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    position:relative; overflow:hidden;
+  }
+  .logo-card.dark  { background: var(--bg3); }
+  .logo-card.light { background: #F0F4FF; }
+  .logo-card.green { background: linear-gradient(135deg,#001A0D,#002814); border-color:rgba(0,255,148,.2); }
+
+  .logo-card .label {
+    font-family:var(--mono); font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--muted); margin-top:8px;
+  }
+  .logo-card.light .label { color:#94A3B8; }
+
+  /* inline logo */
+  .inline-logo {
+    display:flex; align-items:center; gap:12px;
+  }
+  .inline-mark {
+    width:40px; height:40px;
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:800; font-size:15px;
+    position:relative;
+  }
+  .inline-mark.dk { background:var(--bg2); border:1px solid var(--border); color:var(--green); }
+  .inline-mark.lt { background:#E8F4FF; border:1px solid #CBD5E1; color:#0A6E3E; }
+  .inline-mark.gn { background:rgba(0,255,148,.1); border:1px solid rgba(0,255,148,.3); color:var(--green); }
+
+  .inline-name {
+    font-family:var(--mono); font-weight:700; font-size:20px; letter-spacing:-.02em;
+  }
+  .inline-name.dk  { color:var(--text); }
+  .inline-name.lt  { color:#0F172A; }
+  .inline-name.gn  { color:var(--green); }
+  .inline-name span.dk { color:var(--green); }
+  .inline-name span.lt { color:#0A6E3E; }
+  .inline-name span.gn { color:rgba(0,255,148,.6); }
+
+  /* ── COLORS ── */
+  .color-grid {
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:12px;
+  }
+  .swatch {
+    border-radius:12px; overflow:hidden;
+    border:1px solid var(--border);
+  }
+  .swatch-color { height:80px; }
+  .swatch-info {
+    padding:12px;
+    background:var(--bg3);
+  }
+  .swatch-name { font-weight:600; font-size:13px; margin-bottom:4px; }
+  .swatch-hex  { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .swatch-role { font-size:10px; color:var(--muted); margin-top:2px; letter-spacing:.05em; text-transform:uppercase; }
+
+  /* ── TYPE ── */
+  .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .type-card {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:16px; padding:28px;
+  }
+  .type-specimen { margin-bottom:20px; }
+  .type-meta { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .type-meta strong { color:var(--green); display:block; margin-bottom:4px; }
+
+  /* ── UI COMPONENTS ── */
+  .components-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .comp-card {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:16px; padding:28px;
+  }
+  .comp-title { font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:.15em; text-transform:uppercase; margin-bottom:20px; }
+
+  /* buttons */
+  .btn-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+  .btn {
+    font-family:var(--mono); font-size:13px; font-weight:600;
+    padding:10px 20px; border-radius:8px; border:none; cursor:pointer;
+    letter-spacing:.02em; transition:all .15s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary { background:var(--green); color:#0A0E1A; }
+  .btn-primary:hover { background:var(--green2); box-shadow:0 0 20px rgba(0,255,148,.3); }
+  .btn-outline { background:transparent; color:var(--green); border:1px solid rgba(0,255,148,.3); }
+  .btn-outline:hover { background:rgba(0,255,148,.05); border-color:var(--green); }
+  .btn-ghost  { background:transparent; color:var(--muted); border:1px solid var(--border); }
+  .btn-ghost:hover  { color:var(--text); border-color:var(--text); }
+  .btn-sm { font-size:11px; padding:7px 14px; }
+
+  /* badges */
+  .badge-row { display:flex; gap:8px; flex-wrap:wrap; }
+  .badge {
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    padding:4px 10px; border-radius:100px; letter-spacing:.05em;
+  }
+  .badge-green  { background:rgba(0,255,148,.1); color:var(--green); border:1px solid rgba(0,255,148,.2); }
+  .badge-cyan   { background:rgba(0,212,255,.1); color:var(--cyan); border:1px solid rgba(0,212,255,.2); }
+  .badge-purple { background:rgba(139,92,246,.1); color:var(--purple); border:1px solid rgba(139,92,246,.2); }
+  .badge-gray   { background:rgba(100,116,139,.1); color:var(--muted); border:1px solid rgba(100,116,139,.2); }
+
+  /* input */
+  .input-demo {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:8px; padding:10px 14px;
+    font-family:var(--mono); font-size:13px; color:var(--text);
+    width:100%; outline:none;
+    transition:border-color .15s;
+  }
+  .input-demo:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,255,148,.08); }
+  .input-wrapper { margin-bottom:12px; }
+  .input-label { font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:6px; display:block; letter-spacing:.05em; }
+
+  /* ── PROFILE CARD MOCK ── */
+  .profile-mock {
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  .profile-mock::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--green), var(--cyan));
+  }
+  .profile-top { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+  .avatar {
+    width:48px; height:48px; border-radius:12px;
+    background:linear-gradient(135deg,var(--green),var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:700; font-size:18px; color:#0A0E1A;
+    flex-shrink:0;
+  }
+  .profile-name { font-weight:600; font-size:16px; margin-bottom:4px; }
+  .profile-handle { font-family:var(--mono); font-size:12px; color:var(--muted); }
+  .profile-level {
+    margin-left:auto;
+    background:rgba(0,255,148,.08);
+    border:1px solid rgba(0,255,148,.2);
+    border-radius:8px; padding:6px 12px;
+    text-align:center;
+  }
+  .level-num { font-family:var(--mono); font-weight:800; font-size:20px; color:var(--green); line-height:1; }
+  .level-label { font-family:var(--mono); font-size:9px; color:var(--muted); letter-spacing:.1em; }
+
+  .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+  .stat {
+    background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:12px;
+    text-align:center;
+  }
+  .stat-val { font-family:var(--mono); font-weight:700; font-size:20px; color:var(--green); line-height:1; }
+  .stat-key { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:4px; letter-spacing:.08em; text-transform:uppercase; }
+
+  .stack-row { display:flex; gap:6px; flex-wrap:wrap; }
+  .stack-tag {
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    padding:4px 10px; border-radius:6px;
+    background:var(--bg3); border:1px solid var(--border); color:var(--muted);
+  }
+
+  /* commit strip */
+  .commit-strip { display:flex; gap:3px; margin-top:16px; }
+  .commit-day {
+    flex:1; border-radius:3px; height:12px;
+    background:var(--bg3);
+    transition:background .2s;
+  }
+  .commit-day.l1 { background: rgba(0,255,148,.15); }
+  .commit-day.l2 { background: rgba(0,255,148,.35); }
+  .commit-day.l3 { background: rgba(0,255,148,.6); }
+  .commit-day.l4 { background: var(--green); }
+
+  /* ── MISSION CARD ── */
+  .mission-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:16px; padding:20px; position:relative; overflow:hidden;
+  }
+  .mission-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--cyan),var(--purple));
+  }
+  .mission-week {
+    font-family:var(--mono); font-size:10px; color:var(--muted);
+    letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px;
+  }
+  .mission-title { font-weight:600; font-size:15px; margin-bottom:6px; }
+  .mission-desc  { font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+  .mission-footer { display:flex; align-items:center; justify-content:space-between; }
+  .mission-deadline { font-family:var(--mono); font-size:11px; color:var(--muted); }
+  .deadline-val { color:var(--cyan); }
+
+  .progress-bar {
+    width:100%; height:4px; background:var(--bg3);
+    border-radius:2px; margin-bottom:16px; overflow:hidden;
+  }
+  .progress-fill {
+    height:100%; width:60%;
+    background:linear-gradient(90deg,var(--green),var(--cyan));
+    border-radius:2px;
+  }
+
+  /* ── TERMINAL BLOCK ── */
+  .terminal {
+    background:#050810; border:1px solid var(--border);
+    border-radius:12px; overflow:hidden; margin-top:8px;
+  }
+  .terminal-bar {
+    background:var(--bg3); padding:10px 16px;
+    display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .d-red { background:#FF5F57; }
+  .d-yel { background:#FEBC2E; }
+  .d-grn { background:#28C840; }
+  .terminal-title { font-family:var(--mono); font-size:11px; color:var(--muted); margin-left:8px; }
+  .terminal-body { padding:20px; font-family:var(--mono); font-size:13px; line-height:1.8; }
+  .t-prompt { color:var(--green); }
+  .t-cmd    { color:var(--text); }
+  .t-out    { color:var(--muted); }
+  .t-ok     { color:var(--green); }
+  .t-info   { color:var(--cyan); }
+  .t-cursor {
+    display:inline-block; width:8px; height:14px;
+    background:var(--green); vertical-align:middle;
+    animation:blink 1s step-end infinite;
+  }
+
+  /* ── FOOTER ── */
+  .brand-footer {
+    border-top:1px solid var(--border);
+    padding-top:40px; margin-top:20px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .footer-logo { display:flex; align-items:center; gap:10px; }
+  .footer-mark {
+    width:32px; height:32px; border-radius:8px;
+    background:var(--bg3); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:800; font-size:13px; color:var(--green);
+  }
+  .footer-name { font-family:var(--mono); font-weight:700; font-size:16px; }
+  .footer-name span { color:var(--green); }
+  .footer-note { font-family:var(--mono); font-size:11px; color:var(--muted); }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="logo-mark">
+      <span class="logo-glyph">&gt;_</span>
+      <div class="logo-dot"></div>
+    </div>
+    <div class="logo-wordmark">code<span>mates</span></div>
+    <div class="logo-tagline">// <em>evolução técnica</em> medida em código real</div>
+  </div>
+
+  <!-- LOGO VARIANTS -->
+  <div class="section">
+    <div class="section-label">// 01 — logo</div>
+    <div class="section-title">Variações do Logo</div>
+    <div class="logo-grid">
+
+      <!-- dark -->
+      <div class="logo-card dark">
+        <div class="inline-logo">
+          <div class="inline-mark dk">&gt;_</div>
+          <div class="inline-name dk">code<span class="dk">mates</span></div>
+        </div>
+        <div class="label">Dark — uso padrão</div>
+      </div>
+
+      <!-- light -->
+      <div class="logo-card light">
+        <div class="inline-logo">
+          <div class="inline-mark lt">&gt;_</div>
+          <div class="inline-name lt" style="color:#0F172A">code<span class="lt">mates</span></div>
+        </div>
+        <div class="label" style="color:#94A3B8">Light — fundos claros</div>
+      </div>
+
+      <!-- green -->
+      <div class="logo-card green">
+        <div class="inline-logo">
+          <div class="inline-mark gn">&gt;_</div>
+          <div class="inline-name gn">code<span class="gn">mates</span></div>
+        </div>
+        <div class="label">Green — destaque / marca</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COLORS -->
+  <div class="section">
+    <div class="section-label">// 02 — cores</div>
+    <div class="section-title">Paleta de Cores</div>
+    <div class="color-grid">
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#00FF94"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#00FF94">Terminal Green</div>
+          <div class="swatch-hex">#00FF94</div>
+          <div class="swatch-role">Primary / Accent</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#00D4FF"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#00D4FF">Cyber Cyan</div>
+          <div class="swatch-hex">#00D4FF</div>
+          <div class="swatch-role">Secondary / Info</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#8B5CF6"></div>
+        <div class="swatch-info">
+          <div class="swatch-name" style="color:#8B5CF6">Code Purple</div>
+          <div class="swatch-hex">#8B5CF6</div>
+          <div class="swatch-role">Tertiary / Special</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0A0E1A"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Deep Dark</div>
+          <div class="swatch-hex">#0A0E1A</div>
+          <div class="swatch-role">Background Base</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#151C30"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Surface</div>
+          <div class="swatch-hex">#151C30</div>
+          <div class="swatch-role">Cards / Panels</div>
+        </div>
+      </div>
+
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1E2D4A"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Border</div>
+          <div class="swatch-hex">#1E2D4A</div>
+          <div class="swatch-role">Dividers / Lines</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="section">
+    <div class="section-label">// 03 — tipografia</div>
+    <div class="section-title">Tipografia</div>
+    <div class="type-grid">
+
+      <div class="type-card">
+        <div class="type-specimen">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:36px; font-weight:800; color:var(--green); line-height:1; margin-bottom:12px;">JetBrains<br>Mono</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--muted);">AaBbCc 0123456789<br>{'function commit() {}'}</div>
+        </div>
+        <div class="type-meta">
+          <strong>JetBrains Mono</strong>
+          Títulos · Logo · Código · Badges · Labels<br>
+          Pesos: 300 400 500 600 700 800
+        </div>
+      </div>
+
+      <div class="type-card">
+        <div class="type-specimen">
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:36px; font-weight:700; color:var(--text); line-height:1; margin-bottom:12px;">Space<br>Grotesk</div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-size:14px; color:var(--muted);">AaBbCc 0123456789<br>Evolução técnica real</div>
+        </div>
+        <div class="type-meta">
+          <strong>Space Grotesk</strong>
+          Corpo · Descrições · UI · Parágrafos<br>
+          Pesos: 300 400 500 600 700
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UI COMPONENTS -->
+  <div class="section">
+    <div class="section-label">// 04 — componentes</div>
+    <div class="section-title">Componentes de UI</div>
+    <div class="components-grid">
+
+      <div class="comp-card">
+        <div class="comp-title">// buttons</div>
+        <div class="btn-row">
+          <button class="btn btn-primary">▶ Iniciar Missão</button>
+          <button class="btn btn-outline">Ver Grupo</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm">Cancelar</button>
+          <button class="btn btn-primary btn-sm">✓ Confirmar</button>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">// badges + tags</div>
+        <div class="badge-row" style="margin-bottom:16px">
+          <span class="badge badge-green">● Online</span>
+          <span class="badge badge-cyan">🔥 Streak: 4</span>
+          <span class="badge badge-purple">MVP</span>
+          <span class="badge badge-gray">Entregue</span>
+        </div>
+        <div class="badge-row">
+          <span class="badge badge-green">TypeScript</span>
+          <span class="badge badge-cyan">Python</span>
+          <span class="badge badge-purple">React</span>
+          <span class="badge badge-gray">Node.js</span>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">// inputs</div>
+        <div class="input-wrapper">
+          <label class="input-label">// nome do grupo</label>
+          <input class="input-demo" type="text" placeholder="ex: fullstack-squad" />
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label">// stack alvo</label>
+          <input class="input-demo" type="text" placeholder="ex: React + Node.js" />
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-title">// terminal block</div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <div class="dot d-red"></div>
+            <div class="dot d-yel"></div>
+            <div class="dot d-grn"></div>
+            <span class="terminal-title">codemates — agent</span>
+          </div>
+          <div class="terminal-body">
+            <div><span class="t-prompt">▶</span> <span class="t-cmd">analyzing github profile...</span></div>
+            <div><span class="t-out">  ✓ repos scanned: 12</span></div>
+            <div><span class="t-ok">  ✓ TypeScript detected (68%)</span></div>
+            <div><span class="t-info">  → generating mission...</span></div>
+            <div><span class="t-prompt">▶</span> <span class="t-cmd">mission ready <span class="t-cursor"></span></span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- APP CARDS PREVIEW -->
+  <div class="section">
+    <div class="section-label">// 05 — mockups</div>
+    <div class="section-title">Cards do Produto</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+      <!-- profile card -->
+      <div>
+        <div class="comp-title" style="font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:.15em; text-transform:uppercase; margin-bottom:16px;">// profile card</div>
+        <div class="profile-mock">
+          <div class="profile-top">
+            <div class="avatar">GS</div>
+            <div>
+              <div class="profile-name">Guilherme S.</div>
+              <div class="profile-handle">@guilherme · github verified</div>
+            </div>
+            <div class="profile-level">
+              <div class="level-num">04</div>
+              <div class="level-label">ENGENHEIRO</div>
+            </div>
+          </div>
+          <div class="stats-row">
+            <div class="stat">
+              <div class="stat-val">12</div>
+              <div class="stat-key">Missões</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val">4</div>
+              <div class="stat-key">Streak</div>
+            </div>
+            <div class="stat">
+              <div class="stat-val">3.2k</div>
+              <div class="stat-key">XP</div>
+            </div>
+          </div>
+          <div class="stack-row">
+            <span class="stack-tag">TypeScript</span>
+            <span class="stack-tag">Python</span>
+            <span class="stack-tag">React</span>
+            <span class="stack-tag">Agno</span>
+          </div>
+          <div class="commit-strip" style="margin-top:16px">
+            <div class="commit-day"></div><div class="commit-day l1"></div><div class="commit-day l2"></div>
+            <div class="commit-day l3"></div><div class="commit-day l4"></div><div class="commit-day l2"></div>
+            <div class="commit-day l1"></div><div class="commit-day"></div><div class="commit-day l3"></div>
+            <div class="commit-day l4"></div><div class="commit-day l2"></div><div class="commit-day l1"></div>
+            <div class="commit-day l4"></div><div class="commit-day l3"></div><div class="commit-day"></div>
+            <div class="commit-day l2"></div><div class="commit-day l1"></div><div class="commit-day l3"></div>
+            <div class="commit-day l4"></div><div class="commit-day l2"></div><div class="commit-day l4"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- mission card -->
+      <div>
+        <div class="comp-title" style="font-family:var(--mono); font-size:11px; color:var(--green); letter-spacing:.15em; text-transform:uppercase; margin-bottom:16px;">// mission card</div>
+        <div class="mission-card">
+          <div class="mission-week">// semana 12 · missão ativa</div>
+          <div class="mission-title">API REST com autenticação JWT</div>
+          <div class="mission-desc">Implemente um endpoint de autenticação completo com refresh token, blacklist e middleware de proteção de rotas.</div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div style="display:flex; gap:8px; margin-bottom:16px;">
+            <span class="badge badge-cyan">Node.js</span>
+            <span class="badge badge-green">3/5 entregues</span>
+          </div>
+          <div class="mission-footer">
+            <div class="mission-deadline">prazo: <span class="deadline-val">dom 23:59</span></div>
+            <button class="btn btn-primary btn-sm">Ver Commits ↗</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="brand-footer">
+    <div class="footer-logo">
+      <div class="footer-mark">&gt;_</div>
+      <div class="footer-name">code<span>mates</span></div>
+    </div>
+    <div class="footer-note">Brand Identity v1.0 · 2025</div>
+  </div>
+
+</div>
+</body>
+</html>
