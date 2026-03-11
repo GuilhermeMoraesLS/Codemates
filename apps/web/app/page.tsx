@@ -46,10 +46,8 @@ export default function LandingPage() {
             code<span style={{ color: 'var(--green)' }}>mates</span>
           </span>
         </div>
-        <button onClick={handleLogin} style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 600,
-          padding: '9px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
-          background: 'var(--green)', color: '#0A0E1A',
+        <button onClick={handleLogin} className="btn-primary" style={{
+          fontSize: 13, padding: '9px 20px', borderRadius: 8,
         }}>
           Entrar com GitHub
         </button>
@@ -61,7 +59,7 @@ export default function LandingPage() {
         textAlign: 'center', padding: '120px 48px 80px',
       }}>
         {/* Logo */}
-        <div style={{
+        <div className="animate-fade-in-up" style={{
           width: 80, height: 80, borderRadius: 18,
           background: 'var(--bg3)', border: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -82,7 +80,7 @@ export default function LandingPage() {
           }} />
         </div>
 
-        <h1 style={{
+        <h1 className="animate-fade-in-up delay-1" style={{
           fontFamily: 'JetBrains Mono, monospace', fontWeight: 700,
           fontSize: 52, letterSpacing: '-0.04em', marginBottom: 16,
           color: 'var(--text)',
@@ -90,14 +88,14 @@ export default function LandingPage() {
           code<span style={{ color: 'var(--green)' }}>mates</span>
         </h1>
 
-        <p style={{
+        <p className="animate-fade-in-up delay-2" style={{
           fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
           color: 'var(--muted)', letterSpacing: '0.05em', marginBottom: 48,
         }}>
           // <span style={{ color: 'var(--green)' }}>evolução técnica</span> medida em código real
         </p>
 
-        <p style={{
+        <p className="animate-fade-in-up delay-3" style={{
           fontSize: 18, color: 'var(--text)', maxWidth: 540,
           lineHeight: 1.7, marginBottom: 48, opacity: 0.85,
         }}>
@@ -105,11 +103,8 @@ export default function LandingPage() {
           Sem check-in manual. Sem gamificação vazia.
         </p>
 
-        <button onClick={handleLogin} style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700,
-          padding: '14px 32px', borderRadius: 10, border: 'none', cursor: 'pointer',
-          background: 'var(--green)', color: '#0A0E1A',
-          boxShadow: '0 0 24px rgba(0,255,148,0.25)',
+        <button onClick={handleLogin} className="btn-primary animate-fade-in-up delay-4" style={{
+          fontSize: 15, padding: '14px 32px', borderRadius: 10,
           display: 'flex', alignItems: 'center', gap: 10,
         }}>
           <GitHubIcon />
@@ -117,7 +112,7 @@ export default function LandingPage() {
         </button>
 
         {/* Features */}
-        <div style={{
+        <div className="animate-fade-in-up delay-5" style={{
           display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 16, marginTop: 80, maxWidth: 860, width: '100%',
         }}>
@@ -126,10 +121,7 @@ export default function LandingPage() {
             { icon: '🔗', title: 'Verificação Automática', desc: 'Agent monitora seus commits. Nenhum check-in manual necessário.' },
             { icon: '🏆', title: 'Ranking do Grupo', desc: 'Compete com seus mates. Streaks semanais. Progresso real.' },
           ].map((f) => (
-            <div key={f.title} style={{
-              background: 'var(--bg3)', border: '1px solid var(--border)',
-              borderRadius: 16, padding: '28px 24px', textAlign: 'left',
-            }}>
+            <div key={f.title} className="feature-card">
               <div style={{ fontSize: 28, marginBottom: 12 }}>{f.icon}</div>
               <h3 style={{
                 fontFamily: 'JetBrains Mono, monospace', fontWeight: 600,

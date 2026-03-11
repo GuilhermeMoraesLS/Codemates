@@ -42,6 +42,29 @@ async def get_github_profile(username: str):
     return profile.data[0]
 
 
+@router.get("/{username}/groups")
+async def get_user_groups(username: str):
+    """Return groups the user is a member of."""
+    db = get_supabase()
+
+    user = db.table("users").select("id").eq("username", username).execute()
+    if not user.data:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    memberships = (
+        db.table("group_members")
+        .select("group_id")
+        .eq("user_id", user.data[0]["id"])
+        .execute()
+    )
+    if not memberships.data:
+        return []
+
+    group_ids = [m["group_id"] for m in memberships.data]
+    groups = db.table("groups").select("*").in_("id", group_ids).execute()
+    return groups.data
+
+
 @router.get("/{username}/deliveries")
 async def get_user_deliveries(username: str):
     """Return recent deliveries for a user's public profile."""

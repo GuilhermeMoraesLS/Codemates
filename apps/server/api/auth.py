@@ -71,7 +71,11 @@ async def github_callback(body: GitHubCallbackRequest):
             profile_data = run_profile_agent(username, github_token)
             db.table("github_profiles").upsert({
                 "user_id": user["id"],
-                **profile_data,
+                "linguagens_json": profile_data.get("linguagens_json", {}),
+                "frameworks_json": profile_data.get("frameworks_json", []),
+                "nivel_mercado": profile_data.get("nivel_mercado"),
+                "repos_publicos": profile_data.get("repos_publicos", 0),
+                "frequencia_commits": profile_data.get("frequencia_commits", "baixa"),
                 "ultimo_scan": datetime.utcnow().isoformat(),
             }).execute()
         except Exception:

@@ -18,9 +18,15 @@ async def exchange_code_for_token(code: str, client_id: str, client_secret: str)
                 "code": code,
             },
         )
-        data = response.json()
+        print(f"[GitHub OAuth] status={response.status_code} body={response.text[:300]!r}")
+        if not response.text:
+            raise ValueError("GitHub OAuth retornou resposta vazia (code expirado?). Tente logar novamente.")
+        try:
+            data = response.json()
+        except Exception:
+            raise ValueError(f"Resposta inesperada do GitHub (status {response.status_code}): {response.text[:200]}")
         if "access_token" not in data:
-            raise ValueError(f"GitHub OAuth error: {data.get('error_description', data)}")
+            raise ValueError(f"GitHub OAuth error: {data.get('error_description', data.get('error', data))}")
         return data["access_token"]
 
 

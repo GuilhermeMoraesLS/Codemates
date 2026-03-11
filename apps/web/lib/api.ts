@@ -38,6 +38,10 @@ export async function getUserGithubProfile(username: string) {
   return request<GithubProfile>(`/users/${username}/github-profile`)
 }
 
+export async function getUserGroups(username: string) {
+  return request<Group[]>(`/users/${username}/groups`)
+}
+
 export async function getUserDeliveries(username: string) {
   return request<Delivery[]>(`/users/${username}/deliveries`)
 }
@@ -83,6 +87,8 @@ export interface User {
 
 export interface GithubProfile {
   linguagens_json: Record<string, number>
+  frameworks_json: string[]
+  nivel_mercado: string | null
   repos_publicos: number
   frequencia_commits: string
   ultimo_scan: string | null

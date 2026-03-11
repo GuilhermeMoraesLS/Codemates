@@ -18,6 +18,8 @@ class GitHubToolkit(Toolkit):
         }
         self.register(self.get_user_repos)
         self.register(self.get_repo_languages)
+        self.register(self.get_repo_topics)
+        self.register(self.get_repo_file)
         self.register(self.get_commit_files)
         self.register(self.get_recent_commits)
 
@@ -63,6 +65,45 @@ class GitHubToolkit(Toolkit):
             if response.status_code != 200:
                 return f"Error: {response.status_code}"
             return json.dumps(response.json())
+
+    def get_repo_topics(self, owner: str, repo: str) -> str:
+        """
+        Fetch topics/tags for a repository.
+        Returns JSON array like ["react", "nextjs", "typescript"].
+        Topics are user-defined tags that often indicate frameworks and domains.
+        """
+        import json
+        with httpx.Client() as client:
+            response = client.get(
+                f"{GITHUB_API}/repos/{owner}/{repo}/topics",
+                headers={**self.headers, "Accept": "application/vnd.github.mercy-preview+json"},
+            )
+            if response.status_code != 200:
+                return "[]"
+            return json.dumps(response.json().get("names", []))
+
+    def get_repo_file(self, owner: str, repo: str, path: str) -> str:
+        """
+        Fetch the decoded content of a file in a repository.
+        Use this to read dependency files like package.json, requirements.txt,
+        pyproject.toml, Cargo.toml, build.gradle, pom.xml, go.mod, composer.json.
+        Returns the raw text content (max 8KB) or an error string.
+        """
+        import base64
+        with httpx.Client() as client:
+            response = client.get(
+                f"{GITHUB_API}/repos/{owner}/{repo}/contents/{path}",
+                headers=self.headers,
+            )
+            if response.status_code == 404:
+                return f"file not found: {path}"
+            if response.status_code != 200:
+                return f"error: {response.status_code}"
+            data = response.json()
+            if data.get("encoding") == "base64":
+                content = base64.b64decode(data["content"]).decode("utf-8", errors="replace")
+                return content[:8000]  # cap at 8KB
+            return data.get("content", "")[:8000]
 
     def get_commit_files(self, owner: str, repo: str, sha: str) -> str:
         """
