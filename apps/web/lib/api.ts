@@ -92,6 +92,9 @@ export interface GithubProfile {
   repos_publicos: number
   frequencia_commits: string
   ultimo_scan: string | null
+  especialidade_detectada: string
+  areas_a_fortalecer: string[]
+  missao_sugerida: string
 }
 
 export interface Group {

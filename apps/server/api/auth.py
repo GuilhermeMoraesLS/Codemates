@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException
 from jose import jwt
 from datetime import datetime, timedelta
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 from core.config import get_settings
 from core.supabase_client import get_supabase
@@ -76,10 +79,13 @@ async def github_callback(body: GitHubCallbackRequest):
                 "nivel_mercado": profile_data.get("nivel_mercado"),
                 "repos_publicos": profile_data.get("repos_publicos", 0),
                 "frequencia_commits": profile_data.get("frequencia_commits", "baixa"),
+                "especialidade_detectada": profile_data.get("especialidade_detectada", ""),
+                "areas_a_fortalecer": profile_data.get("areas_a_fortalecer", []),
+                "missao_sugerida": profile_data.get("missao_sugerida", ""),
                 "ultimo_scan": datetime.utcnow().isoformat(),
             }).execute()
-        except Exception:
-            pass  # Non-blocking — profile scan failure shouldn't break login
+        except Exception as e:
+            logger.error(f"[profile_agent] falhou para {username}: {type(e).__name__}: {e}")
 
     # 5. Issue JWT
     token = create_jwt(user["id"])

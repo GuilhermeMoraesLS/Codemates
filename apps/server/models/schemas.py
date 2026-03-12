@@ -30,6 +30,11 @@ class GitHubProfileData(BaseModel):
     linguagens_json: dict = Field(default_factory=dict)
     repos_publicos: int = 0
     frequencia_commits: str = "baixa"  # alta | media | baixa
+    frameworks_json: list = Field(default_factory=list)
+    nivel_mercado: str = ""
+    especialidade_detectada: str = ""
+    areas_a_fortalecer: list = Field(default_factory=list)
+    missao_sugerida: str = ""
 
 
 # ── Groups ────────────────────────────────────────────────────

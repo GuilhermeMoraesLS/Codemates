@@ -33,7 +33,10 @@ Return ONLY this JSON, no extra text, no markdown:
   "frameworks_json": ["React", "Next.js", "FastAPI", "Prisma"],
   "nivel_mercado": "fullstack web",
   "repos_publicos": 12,
-  "frequencia_commits": "alta"
+  "frequencia_commits": "alta",
+  "especialidade_detectada": "aplicações fullstack com Next.js e FastAPI focadas em SaaS",
+  "areas_a_fortalecer": ["testes automatizados", "CI/CD e automação de deploy"],
+  "missao_sugerida": "Adicione testes unitários ao seu projeto FastAPI mais recente usando pytest. Cubra pelo menos 3 rotas com assertions de status code e payload."
 }
 ```
 
@@ -55,9 +58,73 @@ Return ONLY this JSON, no extra text, no markdown:
 - Include at most 10 entries. If none found, return [].
 
 ## nivel_mercado
-- A short string (2–4 words) describing the developer's market profile.
-- Examples: "fullstack web", "backend Python", "mobile React Native", "data science", "DevOps / infra", "sistemas embarcados", "Java enterprise", "frontend React"
-- Base this on the combination of languages + frameworks detected.
+Use o dicionário abaixo para classificar. Aplique a PRIMEIRA regra que tiver pelo menos 2 sinais correspondentes nos frameworks, tópicos ou dependências detectados.
+
+"agentes de IA e automação"
+  Sinais: LangChain, LangGraph, Agno, CrewAI, openai (SDK), anthropic (SDK), LlamaIndex, llama-index, autogen, semantic-kernel, haystack, instructor, litellm, DSPy
+
+"data science / ML"
+  Sinais: pandas, numpy, scikit-learn, torch, tensorflow, keras, xgboost, lightgbm, matplotlib, seaborn, jupyter, mlflow, huggingface, transformers, datasets
+
+"mobile"
+  Sinais: react-native, expo, flutter, swift, kotlin, @react-navigation, react-native-*, expo-*
+
+"DevOps / infra"
+  Sinais: terraform, ansible, kubernetes, k8s, helm, docker-compose, github-actions, argocd, pulumi, prometheus, grafana, nginx (como projeto principal)
+
+"Web3 / blockchain"
+  Sinais: solidity, web3.py, ethers, wagmi, hardhat, foundry, anchor (Solana), web3.js
+
+"Java enterprise"
+  Sinais: spring-boot, spring, hibernate, maven, gradle, quarkus, micronaut, jakarta
+
+"backend Python"
+  Sinais: fastapi, django, flask, sqlalchemy, celery, pydantic (sem sinais de IA acima)
+
+"backend Node.js"
+  Sinais: express, nestjs, hapi, koa, prisma, typeorm (sem React/Next como projeto principal)
+
+"fullstack web"
+  Sinais: combinação de React/Next.js/Vue/Angular + qualquer backend (fastapi, express, django, etc.)
+
+"frontend"
+  Sinais: React, Vue, Angular, Svelte, Vite, Tailwind (sem backend relevante detectado)
+
+Caso nenhuma regra tenha 2+ sinais: use "fullstack web" como fallback se houver frontend + backend, ou descreva pela linguagem dominante (ex: "backend Go", "sistemas C++").
+
+## especialidade_detectada
+String de 1 frase (máx 15 palavras) descrevendo o que o dev demonstra mais domínio e entusiasmo nos repos recentes. Combine nivel_mercado + frameworks dominantes + nomes/tópicos dos próprios projetos para ser específico.
+
+Exemplos:
+- "agentes de IA e automação SaaS com Python e Next.js"
+- "aplicações mobile com React Native e Expo"
+- "APIs REST em Django com foco em sistemas de dados"
+- "infraestrutura cloud com Terraform e GitHub Actions"
+
+Nunca retorne algo genérico como "desenvolvedor fullstack". Sempre mencione a especialidade dominante + stack concreta.
+
+## areas_a_fortalecer
+Array com 2 a 3 strings curtas indicando gaps técnicos evidentes. Detecte ausência de:
+- Testes: nenhum pytest/jest/vitest/testing-library nos deps → "testes automatizados"
+- CI/CD: nenhum .github/workflows, Jenkinsfile, .gitlab-ci → "CI/CD e automação de deploy"
+- Containerização: nenhum Dockerfile ou docker-compose.yml → "containerização com Docker"
+- Banco de dados: nenhum ORM ou driver de banco nos deps → "persistência e modelagem de dados"
+- Documentação: nenhum README relevante ou OpenAPI/Swagger → "documentação técnica"
+- Diversidade de linguagens: só 1 linguagem em todos os repos → "ampliar stack com [linguagem complementar sugerida]"
+
+Retorne apenas gaps com evidência real. Mínimo 2, máximo 3. Não invente gaps se não tiver evidência.
+
+## missao_sugerida
+String de 2-3 frases propondo uma tarefa concreta baseada no PRIMEIRO item de areas_a_fortalecer.
+Regras:
+- Seja específico com a stack real do dev (use os frameworks detectados, não genéricos)
+- A missão deve ser completável em 1 semana
+- Termine com uma métrica clara ("3 testes", "1 workflow", "Dockerfile funcionando com docker-compose up")
+
+Exemplos:
+- "Adicione testes unitários ao seu projeto FastAPI mais recente usando pytest. Cubra pelo menos 3 rotas com assertions de status code e payload."
+- "Configure um workflow de CI no GitHub Actions para o seu repo Next.js. Rode lint e build automaticamente em todo push para main."
+- "Crie um Dockerfile para o seu projeto Python mais recente. O container deve subir com docker-compose up sem erros."
 
 ## frequencia_commits
 - "alta"  → repos with commits in the last 30 days

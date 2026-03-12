@@ -37,7 +37,7 @@ async def get_github_profile(username: str):
 
     profile = db.table("github_profiles").select("*").eq("user_id", user.data[0]["id"]).execute()
     if not profile.data:
-        return {"linguagens_json": {}, "repos_publicos": 0, "frequencia_commits": "baixa"}
+        return {"linguagens_json": {}, "repos_publicos": 0, "frequencia_commits": "baixa", "frameworks_json": [], "nivel_mercado": "", "especialidade_detectada": "", "areas_a_fortalecer": [], "missao_sugerida": ""}
 
     return profile.data[0]
 

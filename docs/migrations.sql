@@ -157,6 +157,21 @@ create policy "streak_public_read" on streak_events for select using (true);
 create policy "streak_service_write" on streak_events for all using (auth.role() = 'service_role');
 
 -- ============================================================
+-- MIGRATION v2 — github_profiles: novos campos de análise
+-- ============================================================
+alter table github_profiles
+  add column if not exists frameworks_json jsonb default '[]'::jsonb,
+  add column if not exists nivel_mercado   text  default '';
+
+-- ============================================================
+-- MIGRATION v3 — github_profiles: campos de análise narrativa
+-- ============================================================
+alter table github_profiles
+  add column if not exists especialidade_detectada text  default '',
+  add column if not exists areas_a_fortalecer      jsonb default '[]'::jsonb,
+  add column if not exists missao_sugerida         text  default '';
+
+-- ============================================================
 -- FUNCTIONS
 -- ============================================================
 
