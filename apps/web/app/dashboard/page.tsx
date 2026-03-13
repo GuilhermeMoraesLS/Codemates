@@ -4,6 +4,23 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getUserGithubProfile, getUserGroups, type User, type GithubProfile, type Group } from '@/lib/api'
 
+// ── Terminal card lines ───────────────────────────────────────────────────────
+const TERM_LINES = [
+  '> analisando repositórios públicos...',
+  '> detectando stack de tecnologias...',
+  '> lendo dependências dos últimos 5 repos...',
+  '> identificando padrões de commit...',
+  '> gerando diagnóstico técnico...',
+]
+// ms: [lineAppears, checkAppears] — index 4 (last) has no check
+const TERM_TIMING: [number, number][] = [
+  [0,    800],
+  [1000, 1800],
+  [2000, 3200],
+  [3400, 4200],
+  [4400, Infinity],
+]
+
 // Badge colors (nivel label pill)
 const NIVEL_BADGE_COLORS: Record<string, string> = {
   INICIANTE:  'var(--muted)',
@@ -32,6 +49,11 @@ export default function DashboardPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
+  const [termStep, setTermStep]     = useState(0)
+  const [termChecks, setTermChecks] = useState<boolean[]>([false, false, false, false, false])
+  const [showReveal, setShowReveal]   = useState(false)
+  const [revealFading, setRevealFading] = useState(false)
+  const [barFill, setBarFill]         = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('codemates_token')
@@ -56,6 +78,42 @@ export default function DashboardPage() {
       .catch(() => setGroups([]))
       .finally(() => setGroupsLoading(false))
   }, [user?.username])
+
+  // Terminal animation — starts/resets whenever githubLoading becomes true
+  useEffect(() => {
+    if (!githubLoading) return
+    setTermStep(0)
+    setTermChecks([false, false, false, false, false])
+
+    const timers: ReturnType<typeof setTimeout>[] = []
+    TERM_TIMING.forEach(([lineMs, checkMs], i) => {
+      timers.push(setTimeout(() => setTermStep(s => Math.max(s, i + 1)), lineMs))
+      if (checkMs !== Infinity) {
+        timers.push(setTimeout(() => setTermChecks(c => {
+          const next = [...c]; next[i] = true; return next
+        }), checkMs))
+      }
+    })
+    return () => timers.forEach(clearTimeout)
+  }, [githubLoading])
+
+  // Reveal screen — fires when loading finishes with valid data
+  useEffect(() => {
+    if (githubLoading || githubProfile === null) return
+    const hasData =
+      Object.keys(githubProfile.linguagens_json).length > 0 ||
+      githubProfile.repos_publicos > 0
+    if (!hasData) return
+
+    setShowReveal(true)
+    setRevealFading(false)
+    setBarFill(false)
+
+    const t1 = setTimeout(() => setBarFill(true), 2000)
+    const t2 = setTimeout(() => setRevealFading(true), 2500)
+    const t3 = setTimeout(() => { setShowReveal(false); setRevealFading(false) }, 2800)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+  }, [githubLoading, githubProfile])
 
   function handleLogout() {
     localStorage.removeItem('codemates_token')
@@ -276,19 +334,148 @@ export default function DashboardPage() {
           </div>
 
           {githubLoading ? (
+            /* ── Estado 1: Terminal de análise ─────────────────────── */
             <div style={{
-              background: 'var(--bg3)', border: '1px solid var(--border)',
-              borderRadius: 16, padding: '24px 28px',
+              border: '1px solid var(--border)',
+              borderRadius: 12, overflow: 'hidden',
             }}>
-              {[85, 65, 45, 30].map((w, i) => (
-                <div key={i} style={{ marginBottom: i < 3 ? 14 : 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <div style={shimmerStyle(40, 10, i * 0.12)} />
-                    <div style={shimmerStyle(12, 10, i * 0.12)} />
-                  </div>
-                  <div style={shimmerStyle(w, 6, i * 0.12 + 0.06)} />
+              {/* Terminal title bar */}
+              <div style={{
+                background: 'var(--bg3)',
+                borderBottom: '1px solid var(--border)',
+                padding: '10px 16px',
+                display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['#ff5f57', '#febc2e', '#28c840'].map(c => (
+                    <div key={c} style={{ width: 12, height: 12, borderRadius: '50%', background: c }} />
+                  ))}
                 </div>
-              ))}
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                  color: 'var(--muted)',
+                }}>
+                  profile_agent.py
+                </span>
+              </div>
+
+              {/* Terminal body */}
+              <div style={{
+                background: 'var(--bg)',
+                borderRadius: '0 0 12px 12px',
+                padding: '20px 24px',
+                minHeight: 160,
+                display: 'flex', flexDirection: 'column', gap: 10,
+              }}>
+                {TERM_LINES.map((line, i) => {
+                  if (termStep <= i) return null
+                  const isDone = termChecks[i]
+                  const isActive = i === TERM_LINES.length - 1 && !isDone
+
+                  return (
+                    <div
+                      key={i}
+                      className="animate-fade-in-up"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        animationDuration: '0.3s',
+                        animationDelay: '0s',
+                      }}
+                    >
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                        color: isDone ? 'var(--muted)' : 'var(--text)',
+                        flex: 1,
+                      }}>
+                        {line}
+                      </span>
+                      {isDone && (
+                        <span
+                          className="animate-scale-in"
+                          style={{
+                            color: 'var(--green)',
+                            fontSize: 13,
+                            fontWeight: 700,
+                            animationDuration: '0.2s',
+                          }}
+                        >
+                          ✓
+                        </span>
+                      )}
+                      {isActive && (
+                        <span
+                          className="animate-blink"
+                          style={{ color: 'var(--green)', fontSize: 13, lineHeight: 1 }}
+                        >
+                          █
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+          ) : showReveal ? (
+            /* ── Estado 2: Tela de revelação ───────────────────────── */
+            <div style={{
+              minHeight: 240,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center',
+              gap: 12,
+              opacity: revealFading ? 0 : 1,
+              transition: 'opacity 0.3s ease',
+            }}>
+              <p
+                className="animate-fade-in-up"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                  color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.2em',
+                  margin: 0, animationDuration: '0.4s', animationDelay: '0s',
+                }}
+              >
+                // análise concluída
+              </p>
+
+              <p
+                className="animate-fade-in-up"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 32, fontWeight: 800,
+                  color: 'var(--text)', textAlign: 'center', maxWidth: 500,
+                  lineHeight: 1.2, margin: 0,
+                  animationDuration: '0.5s', animationDelay: '0.2s',
+                }}
+              >
+                {githubProfile?.nivel_mercado}
+              </p>
+
+              <p
+                className="animate-fade-in-up"
+                style={{
+                  fontFamily: 'Space Grotesk, sans-serif', fontSize: 14,
+                  color: 'var(--muted)', margin: 0,
+                  animationDuration: '0.4s', animationDelay: '0.5s',
+                }}
+              >
+                {githubProfile?.especialidade_detectada}
+              </p>
+
+              {/* Progress bar — fills after 2s */}
+              <div style={{
+                width: 200, height: 2,
+                background: 'var(--border)',
+                borderRadius: 1,
+                overflow: 'hidden',
+                marginTop: 24,
+              }}>
+                <div style={{
+                  height: '100%',
+                  background: 'var(--green)',
+                  borderRadius: 1,
+                  width: barFill ? '100%' : '0%',
+                  transition: 'width 0.5s ease',
+                }} />
+              </div>
             </div>
 
           ) : !hasGithubData ? (

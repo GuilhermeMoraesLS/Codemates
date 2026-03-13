@@ -212,3 +212,13 @@ body::before {
 .btn-outline-cyan:active {
   transform: translateY(0);
 }
+
+/* ─── Callback loading ───────────────────────────────────── */
+@keyframes fade-swap {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-fade-swap {
+  animation: fade-swap 0.3s ease forwards;
+}
