@@ -56,7 +56,7 @@ export async function getGroup(groupId: string) {
 }
 
 export async function getGroupRanking(groupId: string) {
-  return request<RankingEntry[]>(`/groups/${groupId}/ranking`)
+  return request<RankingResult>(`/groups/${groupId}/ranking`)
 }
 
 export async function createInvite(groupId: string) {
@@ -72,6 +72,37 @@ export async function joinGroup(token: string) {
 // ── Missions ──────────────────────────────────────────────────
 export async function getCurrentMissions(groupId: string) {
   return request<CurrentMissions>(`/missions/group/${groupId}/current`)
+}
+
+export async function getMyMission(groupId: string) {
+  return request<MissionV2>(`/missions/my/${groupId}`)
+}
+
+export async function submitDelivery(missionId: string, commitUrl: string) {
+  return request<SubmitResult>(`/missions/${missionId}/submit`, {
+    method: 'POST',
+    body: JSON.stringify({ commit_url: commitUrl }),
+  })
+}
+
+export type IndividualMissionResult = MissionV2 | { generating: true }
+
+export async function getMyIndividualMission(): Promise<IndividualMissionResult | null> {
+  try {
+    return await request<MissionV2>('/missions/my')
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === 'generating') return { generating: true }
+    if (err instanceof Error) return null
+    throw err
+  }
+}
+
+export async function getMissionHistory() {
+  return request<{ missoes: MissionHistory[] }>('/missions/history')
+}
+
+export async function getMyMissionHistory() {
+  return getMissionHistory()
 }
 
 // ── Types ─────────────────────────────────────────────────────
@@ -107,6 +138,24 @@ export interface Group {
   created_at: string
 }
 
+export interface RankingMember {
+  user_id: string
+  username: string
+  avatar: string | null
+  nivel: string
+  pontos_semana: number
+  pontos_total: number
+  missoes_entregues: number
+  ultima_entrega: string | null
+  posicao: number
+}
+
+export interface RankingResult {
+  semanal: RankingMember[]
+  geral: RankingMember[]
+}
+
+// Legacy shape still used in groups page
 export interface RankingEntry {
   position: number
   user_id: string
@@ -116,6 +165,35 @@ export interface RankingEntry {
   streak_atual: number
   pontos_grupo: number
   missoes_concluidas: number
+}
+
+export interface MissionV2 {
+  id: string
+  group_id: string
+  user_id: string | null
+  mission_bank_id: string
+  titulo: string
+  descricao: string
+  contexto_mercado: string
+  exemplo_commit: string
+  criterios: Record<string, unknown> | null
+  pontos: number
+  trilha: string
+  nivel: number
+  semana_ref: string
+  status: string
+  entregue: boolean
+  entrega: Delivery | null
+}
+
+export interface SubmitResult {
+  aprovado: boolean
+  feedback: string
+  criterio_falhou: string | null
+  criterios_resultado: Record<string, boolean>
+  pontos_ganhos: number
+  pontos_bonus: number
+  ranking_pos_atual: number | null
 }
 
 export interface Mission {
@@ -145,5 +223,22 @@ export interface Delivery {
   user_id: string
   commit_url: string
   pontos_ganhos: number
+  pontos_bonus: number
+  semana_ref: string
   verificado_em: string
+}
+
+export interface MissionHistory {
+  id: string
+  mission_bank_id: string
+  titulo: string
+  descricao: string
+  trilha: string
+  nivel: number
+  pontos: number
+  semana_ref: string
+  status: string
+  entregue: boolean
+  pontos_ganhos: number | null
+  status_entrega: 'concluida' | 'ativa' | 'expirada'
 }

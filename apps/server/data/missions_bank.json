@@ -1,0 +1,382 @@
+[
+  {
+    "id": "qual_001",
+    "trilha": "qualidade",
+    "nivel": 1,
+    "titulo": "Primeiros testes unitários",
+    "descricao_template": "Adicione 3 testes unitários nas rotas principais da sua API {framework}. Cada teste deve verificar status code e payload de resposta.",
+    "descricao_curta": "3 testes unitários no seu projeto principal",
+    "contexto_mercado": "Empresas esperam que devs júnior saibam escrever testes antes do primeiro dia. Essa é a habilidade que mais diferencia candidatos em processo seletivo.",
+    "exemplo_commit_valido": "feat: add unit tests for user routes\n- test_create_user, test_get_user, test_delete_user",
+    "criterios": {
+      "keywords_no_diff": ["test_", "def test", "it(", "describe(", "expect("],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "qual_002",
+    "trilha": "qualidade",
+    "nivel": 1,
+    "titulo": "Teste de função utilitária isolada",
+    "descricao_template": "Escolha uma função utilitária pura no seu projeto (formatação, cálculo, validação) e escreva pelo menos 4 casos de teste cobrindo entradas válidas e inválidas.",
+    "descricao_curta": "4 casos de teste para uma função utilitária",
+    "contexto_mercado": "Funções utilitárias testadas isoladamente são o ponto de entrada mais seguro para começar a cultura de testes. Todo time sênior prioriza isso antes de subir qualquer lógica nova.",
+    "exemplo_commit_valido": "test: add unit tests for format_date utility\n- valid date, null input, invalid string, edge case midnight",
+    "criterios": {
+      "keywords_no_diff": ["test_", "def test", "it(", "describe(", "assert", "expect("],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 12,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "qual_003",
+    "trilha": "qualidade",
+    "nivel": 2,
+    "titulo": "Testes de integração com banco mockado",
+    "descricao_template": "Implemente testes de integração para pelo menos 2 endpoints que interagem com o banco de dados, usando mocks ou banco em memória para isolar o ambiente de teste.",
+    "descricao_curta": "Testes de integração com banco isolado",
+    "contexto_mercado": "Testes de integração são o que diferencia um dev júnior de um pleno. Mostrar que você sabe testar a camada de dados sem depender de infraestrutura real é um sinal claro de maturidade técnica.",
+    "exemplo_commit_valido": "test: add integration tests for user repository\n- mock db connection, test create and find operations",
+    "criterios": {
+      "keywords_no_diff": ["mock", "patch", "MagicMock", "jest.mock", "vi.mock", "TestClient", "supertest"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_001"
+  },
+  {
+    "id": "qual_004",
+    "trilha": "qualidade",
+    "nivel": 2,
+    "titulo": "Cobertura de casos de erro",
+    "descricao_template": "Adicione testes que validam respostas de erro da sua API: pelo menos um caso 400 (bad request), um 404 (not found) e um 500 ou autenticação negada. Os testes devem verificar status code e mensagem de erro.",
+    "descricao_curta": "Testes para status 400, 404 e 500",
+    "contexto_mercado": "APIs mal testadas em casos de erro causam bugs silenciosos em produção. Recrutadores técnicos procuram especificamente por testes de edge case — é o que mostra que você pensa além do caminho feliz.",
+    "exemplo_commit_valido": "test: add error case coverage for API endpoints\n- test 400 invalid payload, 404 user not found, 401 unauthorized",
+    "criterios": {
+      "keywords_no_diff": ["400", "404", "500", "401", "status_code", "statusCode", "assert_status", "toEqual"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_001"
+  },
+  {
+    "id": "qual_005",
+    "trilha": "qualidade",
+    "nivel": 3,
+    "titulo": "Configurar coverage report",
+    "descricao_template": "Configure um relatório de cobertura de testes no seu projeto usando pytest-cov (Python) ou vitest/istanbul (JS/TS). O coverage deve rodar junto com os testes e gerar um relatório mostrando pelo menos 60% de cobertura.",
+    "descricao_curta": "Coverage report configurado e rodando",
+    "contexto_mercado": "Coverage não é opcional em times sérios. Configurar e manter uma meta de cobertura é responsabilidade do dev, não do DevOps. Esse setup é cobrado em code reviews desde o primeiro sprint.",
+    "exemplo_commit_valido": "chore: configure pytest-cov with 60% coverage threshold\n- add .coveragerc, update CI to fail below threshold",
+    "criterios": {
+      "keywords_no_diff": ["pytest-cov", "coverage", "vitest", "istanbul", ".coveragerc", "lcov", "--coverage"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".toml", ".cfg", ".json", ".yml", ".yaml"],
+      "min_linhas_adicionadas": 8,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_003"
+  },
+  {
+    "id": "qual_006",
+    "trilha": "qualidade",
+    "nivel": 3,
+    "titulo": "Testar autenticação e rotas protegidas",
+    "descricao_template": "Escreva testes que validam o fluxo de autenticação do seu projeto: acesso negado sem token, acesso permitido com token válido e rejeição de token expirado ou inválido.",
+    "descricao_curta": "Testes de autenticação e rotas protegidas",
+    "contexto_mercado": "Falhas de autenticação são a vulnerabilidade número 1 em APIs. Saber testar esse fluxo é obrigatório em qualquer vaga backend com mais de 6 meses de experiência esperada.",
+    "exemplo_commit_valido": "test: add authentication flow tests\n- test unauthenticated access returns 401\n- test valid token grants access\n- test expired token returns 401",
+    "criterios": {
+      "keywords_no_diff": ["401", "403", "token", "bearer", "Authorization", "auth", "jwt", "unauthorized"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_004"
+  },
+  {
+    "id": "devops_001",
+    "trilha": "devops",
+    "nivel": 1,
+    "titulo": "Dockerfile funcional",
+    "descricao_template": "Crie um Dockerfile para o projeto principal em {linguagem}. A imagem deve buildar sem erros, expor a porta correta e usar uma imagem base oficial slim ou alpine.",
+    "descricao_curta": "Dockerfile funcional para o projeto principal",
+    "contexto_mercado": "Dockerizar sua aplicação é o primeiro passo para qualquer deploy moderno. Candidatos que chegam sem conhecimento de Docker básico já começam em desvantagem em 2025.",
+    "exemplo_commit_valido": "chore: add Dockerfile for Python API\n- use python:3.11-slim, install deps, expose port 8000",
+    "criterios": {
+      "keywords_no_diff": ["FROM", "WORKDIR", "COPY", "RUN", "EXPOSE", "CMD", "ENTRYPOINT"],
+      "extensoes_aceitas": ["Dockerfile"],
+      "min_linhas_adicionadas": 8,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript", "docker"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "devops_002",
+    "trilha": "devops",
+    "nivel": 1,
+    "titulo": "Docker Compose com app e banco",
+    "descricao_template": "Adicione um arquivo docker-compose.yml que sobe o projeto principal e um banco de dados (PostgreSQL ou MongoDB) como serviços separados, com network interna e variáveis de ambiente configuradas.",
+    "descricao_curta": "docker-compose com app + banco rodando juntos",
+    "contexto_mercado": "docker-compose é o padrão de facto para ambiente de desenvolvimento local. Projetos sem ele obrigam novos devs a configurar tudo na mão — isso é red flag em code review.",
+    "exemplo_commit_valido": "chore: add docker-compose with app and postgres\n- api service, postgres service, shared network, env vars",
+    "criterios": {
+      "keywords_no_diff": ["services:", "image:", "ports:", "environment:", "networks:", "depends_on:"],
+      "extensoes_aceitas": [".yml", ".yaml"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript", "docker"],
+    "prerequisito_id": "devops_001"
+  },
+  {
+    "id": "devops_003",
+    "trilha": "devops",
+    "nivel": 2,
+    "titulo": "GitHub Actions — lint e build no push",
+    "descricao_template": "Configure um workflow no GitHub Actions que executa lint e build automaticamente em todo push para as branches main e develop. O workflow deve falhar se o lint reportar erros.",
+    "descricao_curta": "CI com lint e build automáticos no GitHub Actions",
+    "contexto_mercado": "CI básico é o mínimo esperado em qualquer empresa que leva qualidade a sério. Configurar um pipeline do zero é habilidade cobrada desde o nível júnior em empresas de produto.",
+    "exemplo_commit_valido": "ci: add GitHub Actions workflow for lint and build\n- trigger on push to main/develop, run eslint and tsc",
+    "criterios": {
+      "keywords_no_diff": ["on:", "push:", "jobs:", "runs-on:", "steps:", "uses:", "run:"],
+      "extensoes_aceitas": [".yml", ".yaml"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript", "github-actions"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "devops_004",
+    "trilha": "devops",
+    "nivel": 2,
+    "titulo": "CI rodando testes automaticamente",
+    "descricao_template": "Adicione ou atualize o workflow de CI para executar a suite de testes automaticamente em todo PR e push para main. O pipeline deve falhar se qualquer teste falhar.",
+    "descricao_curta": "Pipeline CI executando testes em todo PR",
+    "contexto_mercado": "CI sem testes é só um check de sintaxe. Testes rodando automaticamente em PR é o que impede regressões chegarem em produção — e é o que separa times que dormem tranquilos dos que apagam incêndio às 3h.",
+    "exemplo_commit_valido": "ci: add test execution to GitHub Actions pipeline\n- run pytest on push, fail pipeline on test errors",
+    "criterios": {
+      "keywords_no_diff": ["pytest", "npm test", "vitest", "jest", "test:", "- run: pytest", "- run: npm"],
+      "extensoes_aceitas": [".yml", ".yaml"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript", "github-actions"],
+    "prerequisito_id": "devops_003"
+  },
+  {
+    "id": "devops_005",
+    "trilha": "devops",
+    "nivel": 3,
+    "titulo": "Deploy automático para branch main",
+    "descricao_template": "Configure deploy automático para o ambiente de produção ou staging sempre que houver merge na branch main. Use Vercel, Railway, Render ou qualquer plataforma de deploy contínuo.",
+    "descricao_curta": "Deploy automático configurado para main",
+    "contexto_mercado": "Continuous deployment é o padrão em startups e scale-ups. Saber configurar um pipeline de deploy end-to-end é diferencial claro entre candidatos a vaga sênior e pleno.",
+    "exemplo_commit_valido": "ci: add automatic deploy to Railway on main merge\n- deploy step after tests pass, using RAILWAY_TOKEN secret",
+    "criterios": {
+      "keywords_no_diff": ["deploy", "vercel", "railway", "render", "fly.io", "heroku", "release:", "on: push"],
+      "extensoes_aceitas": [".yml", ".yaml", ".json", ".toml"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript", "docker", "github-actions"],
+    "prerequisito_id": "devops_004"
+  },
+  {
+    "id": "devops_006",
+    "trilha": "devops",
+    "nivel": 3,
+    "titulo": "Variáveis de ambiente seguras no CI",
+    "descricao_template": "Configure secrets no repositório GitHub e utilize-os no workflow de CI/CD, garantindo que nenhuma credencial ou chave de API apareça em texto plano nos arquivos de configuração ou logs.",
+    "descricao_curta": "Secrets do GitHub usados corretamente no CI",
+    "contexto_mercado": "Vazar credenciais em repositórios públicos é um dos incidentes de segurança mais comuns e mais evitáveis. Qualquer empresa que passa por due diligence exige que esse controle exista antes do primeiro deploy.",
+    "exemplo_commit_valido": "ci: use GitHub secrets for API keys and database credentials\n- replace hardcoded values with ${{ secrets.API_KEY }}",
+    "criterios": {
+      "keywords_no_diff": ["secrets.", "${{ secrets", "env:", "SECRET", ".env", "dotenv"],
+      "extensoes_aceitas": [".yml", ".yaml", ".env.example"],
+      "min_linhas_adicionadas": 5,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript", "github-actions"],
+    "prerequisito_id": "devops_003"
+  },
+  {
+    "id": "arq_001",
+    "trilha": "arquitetura",
+    "nivel": 1,
+    "titulo": "Extrair lógica de negócio para service",
+    "descricao_template": "Identifique um endpoint que mistura lógica de negócio com lógica de rota e refatore-o criando uma camada de service separada. O endpoint deve delegar a lógica ao service e ficar responsável apenas por receber e retornar dados.",
+    "descricao_curta": "Separar lógica de negócio de um endpoint em service",
+    "contexto_mercado": "Controllers/rotas gordas são o sinal mais claro de código difícil de manter. Separar responsabilidades é o padrão esperado em qualquer time que usa revisão de código.",
+    "exemplo_commit_valido": "refactor: extract user creation logic to UserService\n- route delegates to service, business rules isolated",
+    "criterios": {
+      "keywords_no_diff": ["service", "Service", "_service", "usecase", "UseCase", "business"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_002",
+    "trilha": "arquitetura",
+    "nivel": 1,
+    "titulo": "README profissional",
+    "descricao_template": "Crie ou reescreva o README.md do projeto com: descrição clara, pré-requisitos, instruções de setup, como rodar em desenvolvimento, como rodar os testes e um diagrama ou descrição da arquitetura.",
+    "descricao_curta": "README completo com setup, uso e arquitetura",
+    "contexto_mercado": "Um bom README é o cartão de visita do projeto. Recrutadores técnicos abrem o README antes de qualquer arquivo de código. Um README ruim ou ausente sinaliza falta de cuidado com qualidade.",
+    "exemplo_commit_valido": "docs: add professional README with setup and architecture\n- prerequisites, local setup, test commands, architecture overview",
+    "criterios": {
+      "keywords_no_diff": ["## ", "### ", "```", "setup", "install", "run", "test", "architecture"],
+      "extensoes_aceitas": [".md"],
+      "min_linhas_adicionadas": 30,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_003",
+    "trilha": "arquitetura",
+    "nivel": 2,
+    "titulo": "Documentar API com OpenAPI/Swagger",
+    "descricao_template": "Adicione documentação OpenAPI/Swagger para pelo menos 3 endpoints da sua API, incluindo descrição, parâmetros esperados, exemplos de request/response e códigos de status possíveis.",
+    "descricao_curta": "Documentação OpenAPI para 3+ endpoints",
+    "contexto_mercado": "API sem documentação é API inutilizável para outros times. OpenAPI é o padrão da indústria e ferramentas como FastAPI geram isso automaticamente — não ter é escolha, não limitação.",
+    "exemplo_commit_valido": "docs: add OpenAPI documentation for user and auth endpoints\n- request/response schemas, status codes, examples",
+    "criterios": {
+      "keywords_no_diff": ["openapi", "swagger", "@ApiOperation", "summary=", "description=", "responses=", "tags="],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".yml", ".yaml", ".json"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "arq_001"
+  },
+  {
+    "id": "arq_004",
+    "trilha": "arquitetura",
+    "nivel": 2,
+    "titulo": "Refatorar endpoint duplicado em função reutilizável",
+    "descricao_template": "Identifique código duplicado entre dois ou mais endpoints (validação, query, transformação de dados) e extraia para uma função ou helper reutilizável que ambos os endpoints passem a usar.",
+    "descricao_curta": "Eliminar duplicação entre endpoints com helper reutilizável",
+    "contexto_mercado": "DRY (Don't Repeat Yourself) é o princípio mais cobrado em code review. Código duplicado significa bug duplicado — todo time com padrão de qualidade rejeita PRs com copy-paste óbvio.",
+    "exemplo_commit_valido": "refactor: extract shared pagination logic to get_page_params helper\n- reused in /users and /posts endpoints",
+    "criterios": {
+      "keywords_no_diff": ["def ", "function ", "const ", "helper", "util", "shared", "common"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_001",
+    "trilha": "integracao",
+    "nivel": 1,
+    "titulo": "Consumir API externa e salvar no banco",
+    "descricao_template": "Integre uma API externa (clima, GitHub, ViaCEP, CoinGecko, etc.) no seu projeto: faça uma requisição autenticada ou pública, processe a resposta e persista os dados relevantes no banco de dados.",
+    "descricao_curta": "Consumir API externa e persistir resultado",
+    "contexto_mercado": "Praticamente todo sistema real consome APIs externas. Saber fazer isso de forma limpa e com tratamento de erro adequado é habilidade cobrada em qualquer vaga backend — inclusive estágio.",
+    "exemplo_commit_valido": "feat: integrate ViaCEP API to fetch and store address data\n- GET /addresses/:cep, save to db, handle 404",
+    "criterios": {
+      "keywords_no_diff": ["requests", "fetch(", "axios", "httpx", "aiohttp", "urllib", "api", "response"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_002",
+    "trilha": "integracao",
+    "nivel": 1,
+    "titulo": "Variáveis de ambiente com .env",
+    "descricao_template": "Configure o projeto para ler todas as credenciais e configurações sensíveis de variáveis de ambiente usando python-dotenv, dotenv ou equivalente. Adicione um .env.example com todas as variáveis necessárias documentadas.",
+    "descricao_curta": "Configuração de .env com todas as variáveis do projeto",
+    "contexto_mercado": "Credenciais hardcoded no código são causa imediata de rejeição em processo seletivo e em security review. .env é o básico absoluto — qualquer projeto sem isso em 2025 é red flag.",
+    "exemplo_commit_valido": "chore: configure environment variables with python-dotenv\n- add .env.example, load from .env in config.py",
+    "criterios": {
+      "keywords_no_diff": ["dotenv", "load_dotenv", "os.environ", "process.env", ".env.example", "getenv"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".env.example"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_003",
+    "trilha": "integracao",
+    "nivel": 2,
+    "titulo": "Retry com backoff em chamada de API externa",
+    "descricao_template": "Implemente lógica de retry com exponential backoff em pelo menos uma chamada a API externa no seu projeto. A implementação deve tentar no máximo 3 vezes, com espera crescente entre tentativas, e logar cada tentativa.",
+    "descricao_curta": "Retry com backoff exponencial em API externa",
+    "contexto_mercado": "APIs externas falham. Sistemas resilientes sabem lidar com falhas transitórias sem derrubar o serviço inteiro. Retry com backoff é padrão obrigatório em sistemas de produção e aparece em entrevistas de sistema.",
+    "exemplo_commit_valido": "feat: add exponential backoff retry for payment gateway calls\n- max 3 retries, 1s/2s/4s delays, log each attempt",
+    "criterios": {
+      "keywords_no_diff": ["retry", "backoff", "exponential", "sleep", "attempt", "tenacity", "retry_with"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "integ_001"
+  },
+  {
+    "id": "integ_004",
+    "trilha": "integracao",
+    "nivel": 2,
+    "titulo": "Rate limiting em rota da API",
+    "descricao_template": "Adicione rate limiting em pelo menos uma rota da sua API, limitando o número de requisições por IP ou por usuário autenticado. Configure um limite razoável (ex: 60 req/min) e retorne 429 Too Many Requests quando excedido.",
+    "descricao_curta": "Rate limiting implementado em pelo menos uma rota",
+    "contexto_mercado": "APIs sem rate limiting são vulneráveis a abuso e ataques de força bruta. Implementar isso mostra que você pensa em segurança e resiliência — habilidades que times sérios esperam mesmo de devs júnior.",
+    "exemplo_commit_valido": "feat: add rate limiting to auth and public endpoints\n- 60 req/min per IP, return 429 with Retry-After header",
+    "criterios": {
+      "keywords_no_diff": ["rate_limit", "ratelimit", "RateLimiter", "slowapi", "429", "too many", "throttle"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  }
+]

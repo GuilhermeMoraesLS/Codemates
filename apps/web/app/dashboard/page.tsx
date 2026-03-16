@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getUserGithubProfile, getUserGroups, type User, type GithubProfile, type Group } from '@/lib/api'
+import {
+  getUserGithubProfile, getUserGroups, getGroupRanking, getMyMission,
+  getMyIndividualMission,
+  type User, type GithubProfile, type Group, type MissionV2, type IndividualMissionResult,
+} from '@/lib/api'
 
 // ── Terminal card lines ───────────────────────────────────────────────────────
 const TERM_LINES = [
@@ -20,6 +24,15 @@ const TERM_TIMING: [number, number][] = [
   [3400, 4200],
   [4400, Infinity],
 ]
+
+// Mission trilha colors
+const TRILHA_COLOR: Record<string, string> = {
+  qualidade:    'var(--green)',
+  devops:       'var(--cyan)',
+  arquitetura:  'var(--purple)',
+  integracao:   '#f59e0b',
+  'integração': '#f59e0b',
+}
 
 // Badge colors (nivel label pill)
 const NIVEL_BADGE_COLORS: Record<string, string> = {
@@ -41,6 +54,13 @@ const NIVEL_RING: Record<string, { solid: string; glow: string; bar: string }> =
 
 const NIVEL_ORDER = ['INICIANTE', 'DEV', 'ENGENHEIRO', 'SÊNIOR', 'ARQUITETO']
 
+const NAV_ITEMS = [
+  { icon: '⌂', label: 'dashboard', href: '/dashboard', soon: false },
+  { icon: '⚔', label: 'missões',   href: '/missions',  soon: false },
+  { icon: '◈', label: 'meu grupo', href: '/groups',    soon: true  },
+  { icon: '◎', label: 'ranking',   href: '/ranking',   soon: true  },
+]
+
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
@@ -49,6 +69,10 @@ export default function DashboardPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
+  const [groupPreviews, setGroupPreviews] = useState<Record<string, { rankingPos: number | null; missionTitle: string | null }>>({})
+  const [individualMission, setIndividualMission] = useState<IndividualMissionResult | null>(null)
+  const [missionLoading, setMissionLoading] = useState(true)
+
   const [termStep, setTermStep]     = useState(0)
   const [termChecks, setTermChecks] = useState<boolean[]>([false, false, false, false, false])
   const [showReveal, setShowReveal]   = useState(false)
@@ -77,7 +101,30 @@ export default function DashboardPage() {
       .then(setGroups)
       .catch(() => setGroups([]))
       .finally(() => setGroupsLoading(false))
+    setMissionLoading(true)
+    getMyIndividualMission()
+      .then(setIndividualMission)
+      .catch(() => setIndividualMission(null))
+      .finally(() => setMissionLoading(false))
   }, [user?.username])
+
+  // Fetch ranking position + mission title for each group card preview
+  useEffect(() => {
+    if (!user || groups.length === 0) return
+    groups.forEach(async (g) => {
+      const [rankRes, missRes] = await Promise.allSettled([
+        getGroupRanking(g.id),
+        getMyMission(g.id),
+      ])
+      const rankingPos = rankRes.status === 'fulfilled'
+        ? (rankRes.value.semanal.find(m => m.user_id === user.id)?.posicao ?? null)
+        : null
+      const missionTitle = missRes.status === 'fulfilled'
+        ? missRes.value.titulo
+        : null
+      setGroupPreviews(prev => ({ ...prev, [g.id]: { rankingPos, missionTitle } }))
+    })
+  }, [user?.id, groups])
 
   // Terminal animation — starts/resets whenever githubLoading becomes true
   useEffect(() => {
@@ -186,37 +233,193 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Nav */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 48px', borderBottom: '1px solid var(--border)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {/* ── Sidebar ───────────────────────────────────────────── */}
+      <aside
+        className="sidebar-fixed"
+        style={{
+          position: 'fixed', left: 0, top: 0,
+          height: '100vh', width: 220,
+          background: 'var(--bg3)',
+          borderRight: '1px solid var(--border)',
+          zIndex: 10,
+        }}
+      >
+        {/* Block 1 — Logo */}
+        <div style={{ padding: '24px 20px 16px' }}>
           <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: 16,
+            fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, fontSize: 14,
             color: 'var(--text)',
           }}>
             code<span style={{ color: 'var(--green)' }}>mates</span>
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+
+        {/* Block 2 — User identity */}
+        <div style={{ padding: '0 16px 20px' }}>
+          {user.avatar && (
+            <img
+              src={user.avatar}
+              alt={user.username}
+              style={{
+                width: 48, height: 48, borderRadius: 12, display: 'block',
+                boxShadow: `0 0 0 2px ${ring.solid}, 0 0 12px ${ring.solid}30`,
+              }}
+            />
+          )}
+          <div style={{
+            fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, fontWeight: 600,
+            color: 'var(--text)', marginTop: 10,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {user.username}
+          </div>
           <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-            color: 'var(--muted)',
+            display: 'inline-block',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+            color: ring.solid,
+            background: `${ring.solid}15`,
+            border: `1px solid ${ring.solid}40`,
+            padding: '2px 8px', borderRadius: 20,
+            marginTop: 6,
           }}>
-            @{user.username}
+            &gt; {user.nivel}
           </span>
-          <button onClick={handleLogout} style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-            padding: '6px 14px', borderRadius: 6,
-            background: 'transparent', color: 'var(--muted)',
-            border: '1px solid var(--border)', cursor: 'pointer',
+          {/* XP bar */}
+          <div style={{
+            width: '100%', height: 4, background: 'var(--bg2)',
+            borderRadius: 2, marginTop: 10, overflow: 'hidden',
           }}>
+            <div style={{
+              height: '100%', width: `${xpPct}%`,
+              background: 'linear-gradient(90deg, var(--green), var(--cyan))',
+              borderRadius: 2, transition: 'width 1s ease',
+            }} />
+          </div>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+            color: 'var(--muted)', marginTop: 4,
+          }}>
+            {xpProgresso} / 500 XP → {nextNivel ?? 'MAX'}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '0 16px' }} />
+
+        {/* Block 3 — Navigation */}
+        <div style={{ padding: '16px 8px' }}>
+          {NAV_ITEMS.map(item => {
+            const isActive = item.href === '/dashboard'
+            return (
+              <div
+                key={item.label}
+                onClick={item.soon ? undefined : () => router.push(item.href)}
+                style={{
+                  padding: '8px 12px', borderRadius: 8, marginBottom: 2,
+                  cursor: item.soon ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  opacity: item.soon ? 0.5 : 1,
+                  background: isActive ? 'rgba(0,255,148,0.07)' : 'transparent',
+                  borderLeft: isActive ? '2px solid var(--green)' : '2px solid transparent',
+                  transition: 'background 0.15s ease',
+                }}
+                onMouseEnter={e => { if (!isActive && !item.soon) (e.currentTarget as HTMLDivElement).style.background = 'var(--bg2)' }}
+                onMouseLeave={e => { if (!isActive && !item.soon) (e.currentTarget as HTMLDivElement).style.background = 'transparent' }}
+              >
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                  color: isActive ? 'var(--green)' : 'var(--muted)',
+                }}>
+                  {item.icon}
+                </span>
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                  color: isActive ? 'var(--green)' : 'var(--muted)',
+                  flex: 1,
+                }}>
+                  {item.label}
+                </span>
+                {item.soon && (
+                  <span style={{
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 8,
+                    color: 'var(--muted)', background: 'var(--bg2)',
+                    padding: '1px 5px', borderRadius: 3,
+                  }}>
+                    em breve
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Divider */}
+        <div style={{ height: 1, background: 'var(--border)', margin: '0 16px' }} />
+
+        {/* Block 4 — Trilha de evolução */}
+        <div style={{ padding: '16px 16px', flex: 1, overflowY: 'auto' }}>
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+            color: 'var(--muted)', textTransform: 'uppercase',
+            letterSpacing: '0.15em', marginBottom: 14,
+          }}>
+            // trilha
+          </div>
+          {NIVEL_ORDER.map((nivel, i) => {
+            const isPast    = i < currentIdx
+            const isCurrent = i === currentIdx
+            const isFuture  = i > currentIdx
+            const nRing     = NIVEL_RING[nivel]
+            return (
+              <div
+                key={nivel}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: isCurrent ? '4px 8px' : '4px 0',
+                  borderRadius: isCurrent ? 6 : 0,
+                  background:  isCurrent ? `${nRing.solid}10` : 'transparent',
+                  border:      isCurrent ? `1px solid ${nRing.solid}25` : '1px solid transparent',
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                  color: isPast ? 'var(--green)' : isCurrent ? 'var(--cyan)' : 'var(--muted)',
+                }}>
+                  {isPast ? '✓' : isCurrent ? '→' : '○'}
+                </span>
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                  color: isPast ? 'var(--green)' : isCurrent ? 'var(--cyan)' : 'var(--muted)',
+                  opacity: isFuture ? 0.4 : 1,
+                }}>
+                  {nivel}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Block 5 — Logout */}
+        <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+              color: 'var(--muted)', background: 'transparent',
+              border: 'none', cursor: 'pointer', padding: 0,
+              transition: 'color 0.15s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+          >
             sair
           </button>
         </div>
-      </nav>
+      </aside>
 
+      {/* ── Main content ──────────────────────────────────────── */}
+      <div className="main-sidebar-offset">
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 32px' }}>
 
         {/* ── Header ───────────────────────────────────────────────── */}
@@ -322,6 +525,152 @@ export default function DashboardPage() {
             </div>
           ))}
         </div>
+
+        {/* ── Missão da Semana ─────────────────────────────────────── */}
+        {(missionLoading || individualMission !== null) && (() => {
+          const tc = !missionLoading && individualMission && !('generating' in individualMission)
+            ? TRILHA_COLOR[(individualMission as MissionV2).trilha?.toLowerCase()] ?? 'var(--muted)'
+            : 'var(--muted)'
+          const mission = (!missionLoading && individualMission && !('generating' in individualMission))
+            ? individualMission as MissionV2
+            : null
+          const bonus30 = mission ? Math.round(mission.pontos * 0.3) : 0
+
+          return (
+            <div style={{ marginBottom: 48 }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                color: 'var(--green)', letterSpacing: '0.2em', textTransform: 'uppercase',
+                marginBottom: 20,
+              }}>
+                // missão da semana
+              </div>
+
+              {missionLoading ? (
+                /* Loading skeleton */
+                <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
+                  {[70, 40, 90].map((w, i) => (
+                    <div key={i} style={{
+                      height: i === 0 ? 12 : 10, width: `${w}%`, borderRadius: 4,
+                      marginBottom: i < 2 ? 12 : 0,
+                      background: 'linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%)',
+                      backgroundSize: '200% auto', animation: 'shimmer 1.5s linear infinite',
+                      animationDelay: `${i * 0.1}s`,
+                    }} />
+                  ))}
+                </div>
+
+              ) : 'generating' in (individualMission as IndividualMissionResult) ? (
+                /* State A — generating */
+                <div style={{ background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: 'var(--muted)' }}>
+                        // gerando sua missão...
+                      </span>
+                      <span className="animate-blink" style={{ color: 'var(--green)', fontSize: 14 }}>█</span>
+                    </div>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'var(--muted)', opacity: 0.5 }}>
+                      isso leva alguns segundos
+                    </span>
+                  </div>
+                </div>
+
+              ) : mission && (
+                /* State B — mission loaded */
+                <>
+                  <div style={{
+                    background: 'var(--bg3)', border: '1px solid var(--border)',
+                    borderRadius: 16, padding: '20px 24px',
+                    display: 'flex', alignItems: 'center', gap: 20,
+                  }}>
+                    {/* Left column */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {/* Header: trilha badge + nivel + pontos */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                        <span style={{
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700,
+                          color: tc, background: `${tc}15`, border: `1px solid ${tc}40`,
+                          padding: '2px 8px', borderRadius: 20,
+                        }}>
+                          {mission.trilha}
+                        </span>
+                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'var(--muted)' }}>
+                          nível {mission.nivel}
+                        </span>
+                        <span style={{
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 800,
+                          color: tc, marginLeft: 'auto',
+                        }}>
+                          {mission.pontos} XP
+                        </span>
+                      </div>
+
+                      {/* Title */}
+                      <div style={{
+                        fontFamily: 'Space Grotesk, sans-serif', fontSize: 16, fontWeight: 700,
+                        color: 'var(--text)', marginBottom: 6,
+                      }}>
+                        {mission.titulo}
+                      </div>
+
+                      {/* Description — 2 lines max */}
+                      <div style={{
+                        fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, color: 'var(--muted)',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}>
+                        {mission.descricao}
+                      </div>
+                    </div>
+
+                    {/* Right column */}
+                    <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+                      {mission.entregue ? (
+                        <>
+                          <span style={{
+                            fontFamily: 'JetBrains Mono, monospace', fontSize: 11, fontWeight: 700,
+                            color: 'var(--green)',
+                            background: 'rgba(0,255,148,0.10)',
+                            border: '1px solid rgba(0,255,148,0.30)',
+                            padding: '6px 14px', borderRadius: 8,
+                          }}>
+                            ✓ concluída
+                          </span>
+                          {mission.entrega && (
+                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--green)' }}>
+                              +{mission.entrega.pontos_ganhos} XP
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          className="btn-primary"
+                          onClick={() => router.push('/missions')}
+                          style={{ fontSize: 12, padding: '8px 16px', borderRadius: 8 }}
+                        >
+                          ver missão →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Early delivery bonus hint */}
+                  {!mission.entregue && (
+                    <div style={{ marginTop: 8, paddingLeft: 4 }}>
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                        color: 'var(--cyan)', opacity: 0.7,
+                      }}>
+                        ⚡ entregue até quarta → +{bonus30} XP bônus
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )
+        })()}
 
         {/* ── GitHub Analysis ───────────────────────────────────────── */}
         <div style={{ marginBottom: 48 }}>
@@ -752,37 +1101,64 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {groups.map(group => (
-                <div
-                  key={group.id}
-                  onClick={() => router.push(`/groups/${group.id}`)}
-                  className="group-card"
-                  style={{
-                    background: 'var(--bg2)', border: '1px solid var(--border)',
-                    borderRadius: 12, padding: '16px 20px',
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
-                      {group.nome}
+              {groups.map(group => {
+                const preview = groupPreviews[group.id]
+                const pos = preview?.rankingPos ?? null
+                const posColor =
+                  pos === 1 ? 'var(--green)' :
+                  pos === 2 ? 'var(--cyan)'  :
+                  pos === 3 ? 'var(--purple)' :
+                  'var(--muted)'
+
+                return (
+                  <div
+                    key={group.id}
+                    onClick={() => router.push(`/missions/${group.id}`)}
+                    className="group-card"
+                    style={{
+                      background: 'var(--bg2)', border: '1px solid var(--border)',
+                      borderRadius: 12, padding: '16px 20px',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
+                    }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>
+                        {group.nome}
+                      </div>
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--cyan)', background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', padding: '2px 8px', borderRadius: 20 }}>
+                        {group.stack_alvo}
+                      </span>
+                      {/* Preview line */}
+                      {preview && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+                          {pos && (
+                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: posColor }}>
+                              #{pos} esta semana
+                            </span>
+                          )}
+                          <span style={{
+                            fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260,
+                          }}>
+                            {preview.missionTitle ?? 'sem missão'}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--cyan)', background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)', padding: '2px 8px', borderRadius: 20 }}>
-                      {group.stack_alvo}
-                    </span>
+                    {group.streak_coletivo > 0 && (
+                      <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--green)', flexShrink: 0 }}>
+                        🔥 {group.streak_coletivo}
+                      </span>
+                    )}
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>→</span>
                   </div>
-                  {group.streak_coletivo > 0 && (
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--green)' }}>
-                      🔥 {group.streak_coletivo}
-                    </span>
-                  )}
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)' }}>→</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
       </main>
+      </div>
     </div>
   )
 }

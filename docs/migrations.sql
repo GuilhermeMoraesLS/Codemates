@@ -206,3 +206,59 @@ begin
 end;
 $$ language plpgsql;
 
+-- ============================================================
+-- MIGRATION v4 — sistema de missões individuais com ranking
+-- ============================================================
+ALTER TABLE missions
+  ADD COLUMN IF NOT EXISTS trilha           text DEFAULT '',
+  ADD COLUMN IF NOT EXISTS nivel            int  DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS pontos_base      int  DEFAULT 100,
+  ADD COLUMN IF NOT EXISTS mission_bank_id  text DEFAULT '',
+  ADD COLUMN IF NOT EXISTS titulo           text DEFAULT '',
+  ADD COLUMN IF NOT EXISTS contexto_mercado text DEFAULT '',
+  ADD COLUMN IF NOT EXISTS exemplo_commit   text DEFAULT '';
+
+ALTER TABLE deliveries
+  ADD COLUMN IF NOT EXISTS semana_ref   text DEFAULT '',
+  ADD COLUMN IF NOT EXISTS pontos_bonus int  DEFAULT 0;
+
+-- Ranking semanal: view que agrega pontos por membro por semana
+CREATE OR REPLACE VIEW ranking_semanal AS
+SELECT
+  gm.group_id,
+  gm.user_id,
+  u.username,
+  u.avatar,
+  u.nivel,
+  COALESCE(SUM(d.pontos_ganhos + d.pontos_bonus), 0) AS pontos_semana,
+  COUNT(d.id)                                         AS missoes_entregues,
+  MAX(d.verificado_em)                                AS ultima_entrega
+FROM group_members gm
+JOIN users u ON u.id = gm.user_id
+LEFT JOIN deliveries d ON d.user_id = gm.user_id
+  AND d.semana_ref = TO_CHAR(NOW(), 'IYYY-"W"IW')
+GROUP BY gm.group_id, gm.user_id, u.username, u.avatar, u.nivel;
+
+-- Ranking geral: view com pontos acumulados por grupo
+CREATE OR REPLACE VIEW ranking_geral AS
+SELECT
+  gm.group_id,
+  gm.user_id,
+  u.username,
+  u.avatar,
+  u.nivel,
+  COALESCE(SUM(d.pontos_ganhos + d.pontos_bonus), 0) AS pontos_total,
+  COUNT(d.id)                                         AS total_missoes,
+  gm.joined_at
+FROM group_members gm
+JOIN users u ON u.id = gm.user_id
+LEFT JOIN deliveries d ON d.user_id = gm.user_id
+GROUP BY gm.group_id, gm.user_id, u.username, u.avatar,
+         u.nivel, gm.joined_at;
+
+-- ── MIGRATION V5 — allow individual missions (group_id nullable) ──────────
+-- Individual missions are stored with group_id = NULL.
+-- The original schema had group_id NOT NULL, which caused silent failures
+-- in the background task that generates individual missions on login.
+ALTER TABLE missions ALTER COLUMN group_id DROP NOT NULL;
+

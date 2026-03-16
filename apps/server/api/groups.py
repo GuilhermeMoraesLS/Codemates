@@ -7,7 +7,7 @@ from datetime import datetime
 
 from core.config import get_settings
 from core.supabase_client import get_supabase
-from models.schemas import GroupCreate, GroupPublic, InvitePublic
+from models.schemas import GroupCreate, GroupPublic, InvitePublic, RankingMember
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 security = HTTPBearer()
@@ -132,37 +132,56 @@ async def join_group(token: str, user_id: str = Depends(get_current_user_id)):
 
 @router.get("/{group_id}/ranking")
 async def get_group_ranking(group_id: str):
-    """Return group members sorted by pontos_grupo descending."""
+    """
+    Return weekly and all-time rankings for the group using the
+    ranking_semanal and ranking_geral views (created in migration v4).
+    """
     db = get_supabase()
 
-    members = (
-        db.table("group_members")
-        .select("user_id, missoes_concluidas, pontos_grupo, joined_at")
+    semanal_result = (
+        db.table("ranking_semanal")
+        .select("*")
         .eq("group_id", group_id)
-        .order("pontos_grupo", desc=True)
+        .execute()
+    )
+    geral_result = (
+        db.table("ranking_geral")
+        .select("*")
+        .eq("group_id", group_id)
         .execute()
     )
 
-    if not members.data:
-        return []
+    semanal_map = {r["user_id"]: r for r in semanal_result.data}
+    geral_map = {r["user_id"]: r for r in geral_result.data}
+    all_user_ids = set(semanal_map.keys()) | set(geral_map.keys())
 
-    # Fetch user details
-    user_ids = [m["user_id"] for m in members.data]
-    users = db.table("users").select("id, username, avatar, nivel, streak_atual").in_("id", user_ids).execute()
-    users_map = {u["id"]: u for u in users.data}
-
-    ranking = []
-    for i, m in enumerate(members.data):
-        u = users_map.get(m["user_id"], {})
-        ranking.append({
-            "position": i + 1,
-            "user_id": m["user_id"],
-            "username": u.get("username"),
-            "avatar": u.get("avatar"),
-            "nivel": u.get("nivel"),
-            "streak_atual": u.get("streak_atual", 0),
-            "pontos_grupo": m["pontos_grupo"],
-            "missoes_concluidas": m["missoes_concluidas"],
+    merged = []
+    for uid in all_user_ids:
+        s = semanal_map.get(uid, {})
+        g = geral_map.get(uid, {})
+        merged.append({
+            "user_id": uid,
+            "username": s.get("username") or g.get("username", ""),
+            "avatar": s.get("avatar") or g.get("avatar"),
+            "nivel": s.get("nivel") or g.get("nivel", "INICIANTE"),
+            "pontos_semana": int(s.get("pontos_semana") or 0),
+            "pontos_total": int(g.get("pontos_total") or 0),
+            "missoes_entregues": int(s.get("missoes_entregues") or 0),
+            "ultima_entrega": s.get("ultima_entrega"),
         })
 
-    return ranking
+    # Weekly ranking — sorted by pontos_semana desc
+    semanal_sorted = sorted(merged, key=lambda x: x["pontos_semana"], reverse=True)
+    semanal_ranking = [
+        RankingMember(posicao=i + 1, **m).model_dump()
+        for i, m in enumerate(semanal_sorted)
+    ]
+
+    # All-time ranking — sorted by pontos_total desc
+    geral_sorted = sorted(merged, key=lambda x: x["pontos_total"], reverse=True)
+    geral_ranking = [
+        RankingMember(posicao=i + 1, **m).model_dump()
+        for i, m in enumerate(geral_sorted)
+    ]
+
+    return {"semanal": semanal_ranking, "geral": geral_ranking}

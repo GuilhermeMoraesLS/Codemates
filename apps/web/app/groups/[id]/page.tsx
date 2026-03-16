@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { getGroup, getGroupRanking, createInvite, type Group, type RankingEntry } from '@/lib/api'
+import { getGroup, getGroupRanking, createInvite, type Group, type RankingMember } from '@/lib/api'
 
 const NIVEL_COLORS: Record<string, string> = {
   INICIANTE: 'var(--muted)',
@@ -18,7 +18,7 @@ export default function GroupPage() {
   const groupId = params.id as string
 
   const [group, setGroup] = useState<Group | null>(null)
-  const [ranking, setRanking] = useState<RankingEntry[]>([])
+  const [ranking, setRanking] = useState<{ semanal: RankingMember[]; geral: RankingMember[] }>({ semanal: [], geral: [] })
   const [loading, setLoading] = useState(true)
   const [inviteToken, setInviteToken] = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
@@ -33,7 +33,13 @@ export default function GroupPage() {
   useEffect(() => {
     if (!groupId) return
     Promise.all([getGroup(groupId), getGroupRanking(groupId)])
-      .then(([g, r]) => { setGroup(g); setRanking(r) })
+      .then(([g, r]) => {
+        setGroup(g)
+        setRanking({
+          semanal: Array.isArray(r?.semanal) ? r.semanal : [],
+          geral:   Array.isArray(r?.geral)   ? r.geral   : [],
+        })
+      })
       .catch(() => router.push('/dashboard'))
       .finally(() => setLoading(false))
   }, [groupId, router])
@@ -66,7 +72,11 @@ export default function GroupPage() {
 
   if (!group) return null
 
-  const isOwner = ranking[0]?.user_id === currentUserId || ranking.length === 0
+  const tabAtiva = 'semanal'
+  const rankingAtivo = tabAtiva === 'semanal' ? ranking.semanal : ranking.geral
+  const listaSegura: any[] = Array.isArray(rankingAtivo) ? rankingAtivo : []
+
+  const isOwner = listaSegura[0]?.user_id === currentUserId || listaSegura.length === 0
 
   return (
     <div style={{ minHeight: '100vh', padding: '32px 48px', position: 'relative', zIndex: 1, maxWidth: 900, margin: '0 auto' }}>
@@ -87,7 +97,7 @@ export default function GroupPage() {
               {group.stack_alvo}
             </span>
             <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, color: 'var(--muted)' }}>
-              {ranking.length}/{group.max_membros} membros
+              {listaSegura.length}/{group.max_membros} membros
             </span>
             {group.streak_coletivo > 0 && (
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--green)' }}>
@@ -138,7 +148,7 @@ export default function GroupPage() {
           // ranking
         </h2>
 
-        {ranking.length === 0 ? (
+        {listaSegura.length === 0 ? (
           <div style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 12, padding: 32, textAlign: 'center' }}>
             <p style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: 'var(--muted)', margin: 0 }}>
               // nenhum membro ainda
@@ -146,7 +156,7 @@ export default function GroupPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {ranking.map((member, i) => {
+            {listaSegura.map((member, i) => {
               const nivelColor = NIVEL_COLORS[member.nivel ?? ''] || 'var(--muted)'
               const isFirst = i === 0
               return (

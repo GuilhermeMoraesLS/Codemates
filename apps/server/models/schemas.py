@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -58,14 +58,34 @@ class GroupPublic(BaseModel):
 
 # ── Missions ──────────────────────────────────────────────────
 
+class MissionBankItem(BaseModel):
+    id: str
+    trilha: str
+    nivel: int
+    titulo: str
+    descricao_template: str
+    descricao_curta: str
+    contexto_mercado: str
+    exemplo_commit_valido: str
+    criterios: dict
+    pontos_base: int
+    tags_stack: List[str]
+    prerequisito_id: Optional[str] = None
+
+
 class MissionPublic(BaseModel):
     id: str
     group_id: str
     user_id: Optional[str]
-    tipo: str
+    mission_bank_id: str
+    titulo: str
     descricao: str
+    contexto_mercado: str
+    exemplo_commit: str
     criterios: Optional[dict]
     pontos: int
+    trilha: str
+    nivel: int
     semana_ref: str
     status: str
 
@@ -87,6 +107,25 @@ class DeliveryPublic(BaseModel):
     commit_url: str
     pontos_ganhos: int
     verificado_em: datetime
+
+
+class DeliverySubmit(BaseModel):
+    mission_id: str
+    commit_url: str
+
+
+# ── Ranking ───────────────────────────────────────────────────
+
+class RankingMember(BaseModel):
+    user_id: str
+    username: str
+    avatar: Optional[str]
+    nivel: str
+    pontos_semana: int
+    pontos_total: int
+    missoes_entregues: int
+    ultima_entrega: Optional[datetime]
+    posicao: int
 
 
 # ── Invites ──────────────────────────────────────────────────
