@@ -17,8 +17,12 @@ from core.streak import get_current_week_ref, get_week_start_iso
 from agents.mission_agent import generate_individual_mission, generate_collective_mission
 from agents.verification_agent import verify_commit
 from agents.profile_agent import run_profile_agent
+from agents.market_mission_agent import run_market_mission_agent
 
 import uuid
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import httpx
 
@@ -284,6 +288,141 @@ async def job_verify_commits():
                         print(f"[Verification Agent] Error: {e}")
 
 
+def _send_deadline_email(to_email: str, username: str) -> bool:
+    """Send Thursday deadline reminder. Returns True if sent, False if skipped."""
+    s = get_settings()
+    if not s.smtp_host or not to_email:
+        return False
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "⏰ Faltam 3 dias — ainda dá para o bônus de XP"
+    msg["From"] = s.smtp_from
+    msg["To"] = to_email
+
+    text = (
+        f"Olá {username}!\n\n"
+        "Sua missão da semana ainda está aberta.\n"
+        "Entregue hoje e garanta +20% de bônus em XP.\n\n"
+        "Acesse: http://localhost:3000/missions\n\n"
+        "— Codemates"
+    )
+    html = f"""
+    <div style="background:#0A0E1A;color:#e2e8f0;font-family:sans-serif;padding:32px;border-radius:12px;max-width:500px">
+      <div style="font-family:monospace;font-size:18px;font-weight:700;color:#00FF94;margin-bottom:4px">codemates</div>
+      <div style="font-size:13px;color:#64748b;margin-bottom:24px">evolução técnica semanal</div>
+      <h2 style="font-size:20px;font-weight:700;color:#f1f5f9;margin-bottom:8px">
+        ⏰ Faltam 3 dias — ainda dá para o bônus
+      </h2>
+      <p style="color:#94a3b8;line-height:1.6;margin-bottom:16px">
+        Olá <strong style="color:#f1f5f9">{username}</strong>! Sua missão da semana ainda está aberta.
+        Entregue <strong>hoje</strong> e garanta <span style="color:#00D4FF">+20% bônus em XP</span>.
+      </p>
+      <a href="http://localhost:3000/missions"
+         style="display:inline-block;background:#00FF94;color:#0A0E1A;font-weight:700;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px">
+        ver minha missão →
+      </a>
+    </div>
+    """
+    msg.attach(MIMEText(text, "plain"))
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP(s.smtp_host, s.smtp_port) as server:
+            server.starttls()
+            if s.smtp_user:
+                server.login(s.smtp_user, s.smtp_password)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        print(f"[email] falhou para {to_email}: {e}")
+        return False
+
+
+async def job_generate_market_mission():
+    """
+    Runs every Monday at 07:00 UTC.
+    Generates the optional market mission for the current week.
+    Skips if one already exists for this week.
+    """
+    from core.streak import get_current_week_ref
+    db = get_supabase()
+    semana_ref = get_current_week_ref()
+
+    existing = db.table("market_missions").select("id").eq("semana_ref", semana_ref).execute()
+    if existing.data:
+        print(f"[market_mission] already exists for {semana_ref}")
+        return
+
+    try:
+        result = run_market_mission_agent(semana_ref=semana_ref)
+        db.table("market_missions").insert({
+            "id": str(uuid.uuid4()),
+            "semana_ref": semana_ref,
+            "trilha": result["trilha"],
+            "titulo": result["titulo"],
+            "descricao": result["descricao"],
+            "contexto_mercado": result["contexto_mercado"],
+            "exemplo_commit": result["exemplo_commit"],
+            "criterios": result["criterios"],
+            "pontos": result.get("pontos", 200),
+            "nivel": result.get("nivel", 2),
+        }).execute()
+        print(f"[market_mission] generated for {semana_ref}: {result['titulo']}")
+    except Exception as e:
+        print(f"[market_mission] error: {e}")
+
+
+async def job_deadline_reminder():
+    """
+    Runs every Thursday at 18:00 UTC.
+    Sends deadline reminder to users who haven't delivered their individual mission yet.
+    """
+    db = get_supabase()
+    semana_ref = get_current_week_ref()
+
+    # Find users with active individual missions (no delivery yet)
+    active_missions = (
+        db.table("missions")
+        .select("user_id")
+        .is_("group_id", "null")
+        .eq("semana_ref", semana_ref)
+        .eq("status", "ativa")
+        .execute()
+    )
+    if not active_missions.data:
+        return
+
+    user_ids = [m["user_id"] for m in active_missions.data]
+
+    # Filter out those who already delivered
+    deliveries = (
+        db.table("deliveries")
+        .select("user_id")
+        .eq("semana_ref", semana_ref)
+        .in_("user_id", user_ids)
+        .execute()
+    )
+    delivered_ids = {d["user_id"] for d in deliveries.data}
+    pending_ids = [uid for uid in user_ids if uid not in delivered_ids]
+
+    if not pending_ids:
+        return
+
+    users = (
+        db.table("users")
+        .select("username, email")
+        .in_("id", pending_ids)
+        .execute()
+    )
+
+    sent = 0
+    for u in users.data:
+        if _send_deadline_email(u.get("email", ""), u["username"]):
+            sent += 1
+
+    print(f"[deadline_reminder] {sent}/{len(users.data)} emails enviados — semana {semana_ref}")
+
+
 # ── Scheduler Setup ───────────────────────────────────────────
 scheduler = AsyncIOScheduler()
 
@@ -302,9 +441,21 @@ async def startup():
         CronTrigger(hour=6, minute=0),
         id="daily_verification",
     )
+    # Deadline reminder every Thursday at 18:00 UTC
+    scheduler.add_job(
+        job_deadline_reminder,
+        CronTrigger(day_of_week="thu", hour=18, minute=0),
+        id="deadline_reminder",
+    )
+    # Market mission every Monday at 07:00 UTC
+    scheduler.add_job(
+        job_generate_market_mission,
+        CronTrigger(day_of_week="mon", hour=7, minute=0),
+        id="market_mission",
+    )
     scheduler.start()
     print("[OK] Codemates server started")
-    print("[OK] Scheduler running: missions (Sun 08:00) + verification (daily 06:00)")
+    print("[OK] Scheduler running: missions (Sun 08:00) + verification (daily 06:00) + market mission (Mon 07:00)")
 
 
 @app.on_event("shutdown")

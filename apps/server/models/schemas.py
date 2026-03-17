@@ -24,6 +24,7 @@ class UserPublic(BaseModel):
     pontos_total: int
     nivel: str
     missoes_concluidas: int
+    plano: str = "free"
 
 
 class GitHubProfileData(BaseModel):
@@ -110,7 +111,6 @@ class DeliveryPublic(BaseModel):
 
 
 class DeliverySubmit(BaseModel):
-    mission_id: str
     commit_url: str
 
 

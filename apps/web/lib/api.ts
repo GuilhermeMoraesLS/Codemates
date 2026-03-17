@@ -16,7 +16,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, { ...options, headers })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(err.detail || 'API error')
+    const detail = err.detail
+    const msg = typeof detail === 'string'
+      ? detail
+      : Array.isArray(detail)
+        ? detail.map((e: { msg?: string }) => e.msg ?? JSON.stringify(e)).join('; ')
+        : res.statusText
+    throw new Error(msg || 'API error')
   }
   return res.json()
 }
@@ -59,6 +65,10 @@ export async function getGroupRanking(groupId: string) {
   return request<RankingResult>(`/groups/${groupId}/ranking`)
 }
 
+export async function getGroupFeed(groupId: string) {
+  return request<{ eventos: FeedEvent[] }>(`/groups/${groupId}/feed`)
+}
+
 export async function createInvite(groupId: string) {
   return request<{ token: string; group_id: string; expires_at: string }>(`/groups/${groupId}/invite`, {
     method: 'POST',
@@ -97,12 +107,56 @@ export async function getMyIndividualMission(): Promise<IndividualMissionResult 
   }
 }
 
+export async function generateIndividualMission(trilha: string): Promise<MissionV2> {
+  return request<MissionV2>('/missions/generate-individual', {
+    method: 'POST',
+    body: JSON.stringify({ trilha }),
+  })
+}
+
+export async function regenerateIndividualMission(): Promise<MissionV2> {
+  return request<MissionV2>('/missions/regenerate-individual', { method: 'POST' })
+}
+
 export async function getMissionHistory() {
   return request<{ missoes: MissionHistory[] }>('/missions/history')
 }
 
+export async function getMyActivity() {
+  return request<ActivityWeek[]>('/missions/activity')
+}
+
+export async function getMyAchievements() {
+  return request<{ achievements: Achievement[] }>('/missions/achievements')
+}
+
 export async function getMyMissionHistory() {
   return getMissionHistory()
+}
+
+// ── Market Missions ────────────────────────────────────────────
+export async function getMarketMission() {
+  return request<MarketMissionResponse>('/missions/mercado')
+}
+
+export async function acceptMarketMission() {
+  return request<{ message: string; mission_id: string }>('/missions/mercado/aceitar', { method: 'POST' })
+}
+
+export async function submitMarketMission(commitUrl: string) {
+  return request<{ aprovado: boolean; feedback: string; pontos_ganhos: number }>('/missions/mercado/submit', {
+    method: 'POST',
+    body: JSON.stringify({ commit_url: commitUrl }),
+  })
+}
+
+// ── Portfolio ──────────────────────────────────────────────────
+export async function getUserPortfolio(username: string) {
+  return request<PortfolioResponse>(`/users/${username}/portfolio`)
+}
+
+export async function upgradeToPro() {
+  return request<{ message: string; plano: string }>('/auth/upgrade-pro', { method: 'POST' })
 }
 
 // ── Types ─────────────────────────────────────────────────────
@@ -114,6 +168,7 @@ export interface User {
   pontos_total: number
   nivel: string
   missoes_concluidas: number
+  plano?: string
 }
 
 export interface GithubProfile {
@@ -184,6 +239,7 @@ export interface MissionV2 {
   status: string
   entregue: boolean
   entrega: Delivery | null
+  can_regenerate?: boolean
 }
 
 export interface SubmitResult {
@@ -194,6 +250,36 @@ export interface SubmitResult {
   pontos_ganhos: number
   pontos_bonus: number
   ranking_pos_atual: number | null
+  leveled_up?: boolean
+  new_nivel?: string | null
+  new_achievements?: Achievement[]
+  streak_coletivo_novo?: number | null
+}
+
+export interface FeedEvent {
+  tipo: 'missao_concluida' | 'membro_entrou'
+  timestamp: string
+  username: string
+  avatar: string | null
+  titulo_missao: string | null
+  trilha: string | null
+  xp: number
+}
+
+export interface ActivityWeek {
+  semana_ref: string
+  xp: number
+}
+
+export interface Achievement {
+  id: string
+  nome: string
+  descricao: string
+  icone: string
+  criterio: string
+  xp_bonus: number
+  desbloqueado: boolean
+  desbloqueado_em: string | null
 }
 
 export interface Mission {
@@ -226,6 +312,59 @@ export interface Delivery {
   pontos_bonus: number
   semana_ref: string
   verificado_em: string
+}
+
+export interface PortfolioUser {
+  id: string
+  username: string
+  avatar: string | null
+  nivel: string
+  pontos_total: number
+  missoes_concluidas: number
+  streak_atual: number
+  plano: string
+  created_at: string | null
+}
+
+export interface CompletedMission {
+  id: string
+  titulo: string
+  trilha: string
+  nivel: number
+  pontos: number
+  semana_ref: string
+  pontos_ganhos: number
+  pontos_bonus: number
+  verificado_em: string
+  commit_url: string | null
+}
+
+export interface PortfolioResponse {
+  user: PortfolioUser
+  github_profile: GithubProfile
+  completed_missions: CompletedMission[]
+  achievements: Achievement[]
+  activity: ActivityWeek[]
+}
+
+export interface MarketMission {
+  id: string
+  semana_ref: string
+  trilha: string
+  titulo: string
+  descricao: string
+  contexto_mercado: string
+  exemplo_commit: string
+  criterios: Record<string, unknown>
+  pontos: number
+  nivel: number
+}
+
+export interface MarketMissionResponse {
+  mission: MarketMission | null
+  aceita: boolean
+  entregue: boolean
+  commit_url: string | null
 }
 
 export interface MissionHistory {

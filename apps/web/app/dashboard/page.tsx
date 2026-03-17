@@ -69,7 +69,7 @@ export default function DashboardPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [groupsLoading, setGroupsLoading] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
-  const [groupPreviews, setGroupPreviews] = useState<Record<string, { rankingPos: number | null; missionTitle: string | null }>>({})
+  const [groupPreviews, setGroupPreviews] = useState<Record<string, { rankingPos: number | null; missionTitle: string | null; leaderUsername: string | null; leaderXP: number }>>({})
   const [individualMission, setIndividualMission] = useState<IndividualMissionResult | null>(null)
   const [missionLoading, setMissionLoading] = useState(true)
 
@@ -122,7 +122,12 @@ export default function DashboardPage() {
       const missionTitle = missRes.status === 'fulfilled'
         ? missRes.value.titulo
         : null
-      setGroupPreviews(prev => ({ ...prev, [g.id]: { rankingPos, missionTitle } }))
+      const leader = rankRes.status === 'fulfilled'
+        ? rankRes.value.semanal.find(m => m.posicao === 1)
+        : null
+      const leaderUsername = leader?.username ?? null
+      const leaderXP       = leader?.pontos_semana ?? 0
+      setGroupPreviews(prev => ({ ...prev, [g.id]: { rankingPos, missionTitle, leaderUsername, leaderXP } }))
     })
   }, [user?.id, groups])
 
@@ -400,21 +405,44 @@ export default function DashboardPage() {
           })}
         </div>
 
-        {/* Block 5 — Logout */}
-        <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
-          <button
-            onClick={handleLogout}
-            style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-              color: 'var(--muted)', background: 'transparent',
-              border: 'none', cursor: 'pointer', padding: 0,
-              transition: 'color 0.15s ease',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            sair
-          </button>
+        {/* Block 5 — Pro CTA + Logout */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {user?.plano !== 'pro' && (
+            <button
+              onClick={() => router.push('/pro')}
+              style={{
+                width: '100%', fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+                border: '1px solid rgba(245,158,11,0.3)', borderRadius: 6,
+                padding: '7px 0', cursor: 'pointer',
+              }}
+            >
+              ⚡ upgrade pro
+            </button>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              onClick={() => user && router.push(`/u/${user.username}`)}
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--cyan)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+            >
+              portfólio →
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                color: 'var(--muted)', background: 'transparent',
+                border: 'none', cursor: 'pointer', padding: 0,
+                transition: 'color 0.15s ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+            >
+              sair
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -1130,12 +1158,21 @@ export default function DashboardPage() {
                       </span>
                       {/* Preview line */}
                       {preview && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
-                          {pos && (
-                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: posColor }}>
-                              #{pos} esta semana
-                            </span>
-                          )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            {pos && (
+                              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: posColor }}>
+                                #{pos} esta semana
+                              </span>
+                            )}
+                            {preview.leaderUsername && preview.leaderXP > 0 && (
+                              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: pos === 1 ? 'var(--green)' : 'var(--muted)' }}>
+                                {pos === 1
+                                  ? `você lidera — ${preview.leaderXP} XP`
+                                  : `líder: ${preview.leaderUsername} — ${preview.leaderXP} XP`}
+                              </span>
+                            )}
+                          </div>
                           <span style={{
                             fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)',
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260,

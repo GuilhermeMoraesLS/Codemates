@@ -15,6 +15,17 @@ def get_week_start_iso(week_ref: str) -> str:
     return monday.isoformat() + "Z"
 
 
+def get_last_n_week_refs(n: int) -> list:
+    """Returns the last n ISO week refs in descending order (newest first)."""
+    refs = []
+    d = datetime.utcnow()
+    for _ in range(n):
+        year, week, _ = d.isocalendar()
+        refs.append(f"{year}-W{week:02d}")
+        d -= timedelta(weeks=1)
+    return refs
+
+
 def calcular_nivel(missoes_concluidas: int) -> str:
     """Calculate user level based on completed missions."""
     if missoes_concluidas >= 50:

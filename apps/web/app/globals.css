@@ -261,6 +261,31 @@ body::before {
   background: rgba(255, 255, 255, 0.02);
 }
 
+/* ─── Floating XP animation ──────────────────────────────── */
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0)   scale(1); }
+  30%  { opacity: 1; transform: translateY(-20px) scale(1.08); }
+  100% { opacity: 0; transform: translateY(-80px) scale(0.9); }
+}
+
+/* ─── Level up / modal entrance ──────────────────────────── */
+@keyframes scaleIn {
+  0%   { opacity: 0; transform: scale(0.7); }
+  70%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Achievement toast slide-in ─────────────────────────── */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 /* ─── Tab underline ───────────────────────────────────────── */
 .tab-active {
   color: var(--text);

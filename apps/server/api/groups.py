@@ -185,3 +185,78 @@ async def get_group_ranking(group_id: str):
     ]
 
     return {"semanal": semanal_ranking, "geral": geral_ranking}
+
+
+@router.get("/{group_id}/feed")
+async def get_group_feed(group_id: str):
+    """
+    Return the last 20 activity events for the group.
+    Derives events from deliveries (missions completed) and group_members (joins).
+    No auth required — public feed.
+    """
+    db = get_supabase()
+
+    members_result = (
+        db.table("group_members")
+        .select("user_id, joined_at")
+        .eq("group_id", group_id)
+        .execute()
+    )
+    if not members_result.data:
+        return {"eventos": []}
+
+    member_ids = [m["user_id"] for m in members_result.data]
+
+    users_result = db.table("users").select("id, username, avatar").in_("id", member_ids).execute()
+    user_map = {u["id"]: u for u in users_result.data}
+
+    events: list = []
+
+    # ── Delivery events ───────────────────────────────────────────────────────
+    deliveries_result = (
+        db.table("deliveries")
+        .select("user_id, pontos_ganhos, pontos_bonus, verificado_em, mission_id")
+        .in_("user_id", member_ids)
+        .order("verificado_em", desc=True)
+        .limit(40)
+        .execute()
+    )
+
+    if deliveries_result.data:
+        mission_ids = list({d["mission_id"] for d in deliveries_result.data})
+        missions_result = (
+            db.table("missions")
+            .select("id, titulo, trilha")
+            .in_("id", mission_ids)
+            .execute()
+        )
+        mission_map = {m["id"]: m for m in missions_result.data}
+
+        for d in deliveries_result.data:
+            u = user_map.get(d["user_id"], {})
+            m = mission_map.get(d["mission_id"], {})
+            events.append({
+                "tipo": "missao_concluida",
+                "timestamp": d["verificado_em"],
+                "username": u.get("username", ""),
+                "avatar": u.get("avatar"),
+                "titulo_missao": m.get("titulo", "missão concluída"),
+                "trilha": m.get("trilha", ""),
+                "xp": (d.get("pontos_ganhos") or 0) + (d.get("pontos_bonus") or 0),
+            })
+
+    # ── Member join events ────────────────────────────────────────────────────
+    for m in members_result.data:
+        u = user_map.get(m["user_id"], {})
+        events.append({
+            "tipo": "membro_entrou",
+            "timestamp": m.get("joined_at", ""),
+            "username": u.get("username", ""),
+            "avatar": u.get("avatar"),
+            "titulo_missao": None,
+            "trilha": None,
+            "xp": 0,
+        })
+
+    events.sort(key=lambda x: x.get("timestamp") or "", reverse=True)
+    return {"eventos": events[:20]}

@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     server_secret_key: str = "codemates-dev-secret"
     next_public_api_url: str = "http://localhost:8000"
 
+    # Email (optional — deadline reminders)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "noreply@codemates.dev"
+
     class Config:
         env_file = "../../../.env"
         extra = "ignore"

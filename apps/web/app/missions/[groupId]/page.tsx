@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  getMyMission, getGroupRanking, submitDelivery, getGroup,
-  type User, type Group, type MissionV2, type RankingMember, type SubmitResult,
+  getMyMission, getGroupRanking, submitDelivery, getGroup, getGroupFeed,
+  type User, type Group, type MissionV2, type RankingMember, type SubmitResult, type FeedEvent,
 } from '@/lib/api'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -67,6 +67,10 @@ export default function MissionPage() {
   const [rankingLoading, setRankingLoading] = useState(true)
   const [activeTab, setActiveTab]       = useState<'semanal' | 'geral'>('semanal')
 
+  const [feed, setFeed]                 = useState<FeedEvent[]>([])
+  const [showStreakCelebration, setShowStreakCelebration] = useState(false)
+  const [streakNovo, setStreakNovo]     = useState(0)
+
   const [commitUrl, setCommitUrl]       = useState('')
   const [phase, setPhase]               = useState<SubmitPhase>('idle')
   const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null)
@@ -89,6 +93,9 @@ export default function MissionPage() {
       .then(setRanking)
       .catch(() => setRanking(null))
       .finally(() => setRankingLoading(false))
+    getGroupFeed(groupId)
+      .then(r => setFeed(r.eventos))
+      .catch(() => setFeed([]))
   }, [groupId])
 
   useEffect(() => {
@@ -150,14 +157,36 @@ export default function MissionPage() {
     const res = result.value as SubmitResult
     setSubmitResult(res)
     setPhase(res.aprovado ? 'approved' : 'rejected')
+
+    if (res.aprovado && res.streak_coletivo_novo) {
+      setTimeout(() => {
+        setStreakNovo(res.streak_coletivo_novo!)
+        setShowStreakCelebration(true)
+      }, 1500)
+    }
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   const trilhaColor = (t: string) => TRILHA_COLOR[t?.toLowerCase()] ?? 'var(--muted)'
+  const rankColor   = (pos: number) => pos <= 3 ? RANK_COLOR[pos] : 'var(--muted)'
 
-  const rankColor = (pos: number) =>
-    pos <= 3 ? RANK_COLOR[pos] : 'var(--muted)'
+  function getDiasRestantes(): number {
+    const day = new Date().getUTCDay() // 0=Sun
+    return day === 0 ? 0 : 7 - day
+  }
+
+  function formatTimestamp(ts: string): string {
+    const d = new Date(ts)
+    const now = new Date()
+    const diffMs = now.getTime() - d.getTime()
+    const diffH = Math.floor(diffMs / 3600000)
+    const diffD = Math.floor(diffMs / 86400000)
+    if (diffH < 1) return 'agora'
+    if (diffH < 24) return `${diffH}h atrás`
+    if (diffD < 7) return `${diffD}d atrás`
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  }
 
   if (!user) return null
 
@@ -176,8 +205,63 @@ export default function MissionPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
+  const diasRestantes = getDiasRestantes()
+
   return (
     <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh' }}>
+
+      {/* ── Streak Celebration ───────────────────────────────────── */}
+      {showStreakCelebration && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 10000,
+            background: 'rgba(10,14,26,0.88)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)',
+            animation: 'fadeIn 0.3s ease',
+          }}
+          onClick={() => setShowStreakCelebration(false)}
+        >
+          <div style={{
+            background: 'var(--bg3)',
+            border: '2px solid rgba(0,255,148,0.4)',
+            boxShadow: '0 0 80px rgba(0,255,148,0.15)',
+            borderRadius: 20, padding: '40px 52px',
+            textAlign: 'center', maxWidth: 400,
+            animation: 'scaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1)',
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>🔥</div>
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+              color: 'var(--green)', letterSpacing: '0.25em', marginBottom: 8,
+            }}>
+              // streak coletivo
+            </div>
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace', fontWeight: 800,
+              fontSize: 52, color: 'var(--green)',
+              textShadow: '0 0 30px rgba(0,255,148,0.5)',
+              marginBottom: 8,
+            }}>
+              {streakNovo}
+            </div>
+            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 14, color: 'var(--muted)', marginBottom: 24 }}>
+              todo o grupo entregou esta semana!
+            </div>
+            <button
+              onClick={() => setShowStreakCelebration(false)}
+              style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                color: 'var(--muted)', background: 'transparent',
+                border: '1px solid var(--border)', borderRadius: 8,
+                padding: '8px 20px', cursor: 'pointer',
+              }}
+            >
+              continuar →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside
@@ -302,16 +386,39 @@ export default function MissionPage() {
           })}
         </div>
 
-        {/* Logout */}
-        <div style={{ padding: 16, borderTop: '1px solid var(--border)' }}>
-          <button
-            onClick={() => { localStorage.removeItem('codemates_token'); localStorage.removeItem('codemates_user'); router.push('/') }}
-            style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.15s ease' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
-          >
-            sair
-          </button>
+        {/* Pro CTA + Logout */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {user?.plano !== 'pro' && (
+            <button
+              onClick={() => router.push('/pro')}
+              style={{
+                width: '100%', fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                color: '#f59e0b', background: 'rgba(245,158,11,0.08)',
+                border: '1px solid rgba(245,158,11,0.3)', borderRadius: 6,
+                padding: '7px 0', cursor: 'pointer',
+              }}
+            >
+              ⚡ upgrade pro
+            </button>
+          )}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              onClick={() => user && router.push(`/u/${user.username}`)}
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--cyan)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+            >
+              portfólio →
+            </button>
+            <button
+              onClick={() => { localStorage.removeItem('codemates_token'); localStorage.removeItem('codemates_user'); router.push('/') }}
+              style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.15s ease' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+            >
+              sair
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -324,11 +431,33 @@ export default function MissionPage() {
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--green)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 6 }}>
               // missão da semana
             </div>
-            {group && (
-              <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, fontWeight: 700, color: 'var(--text)' }}>
-                {group.nome}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {group && (
+                <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, fontWeight: 700, color: 'var(--text)', flex: 1 }}>
+                  {group.nome}
+                </div>
+              )}
+              {/* Countdown + streak */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                  color: diasRestantes <= 1 ? '#ef4444' : diasRestantes <= 3 ? '#f59e0b' : 'var(--muted)',
+                  background: diasRestantes <= 1 ? 'rgba(239,68,68,0.08)' : 'var(--bg2)',
+                  border: `1px solid ${diasRestantes <= 1 ? 'rgba(239,68,68,0.25)' : 'var(--border)'}`,
+                  padding: '4px 10px', borderRadius: 6,
+                }}>
+                  {diasRestantes === 0 ? 'último dia' : `${diasRestantes}d restantes`}
+                </span>
+                {group && group.streak_coletivo > 0 && (
+                  <span style={{
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+                    color: 'var(--green)',
+                  }}>
+                    🔥 {group.streak_coletivo}
+                  </span>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* ── Section 1: Mission Card ───────────────────────────── */}
@@ -400,16 +529,20 @@ export default function MissionPage() {
 
                 {/* Contexto mercado */}
                 {mission.contexto_mercado && (
-                  <>
-                    <p style={{
-                      fontFamily: 'Space Grotesk, sans-serif', fontSize: 13,
-                      color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.6,
-                      marginBottom: 16,
-                    }}>
+                  <div style={{
+                    background: 'rgba(0, 212, 255, 0.06)',
+                    border: '1px solid rgba(0, 212, 255, 0.25)',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    marginBottom: 16,
+                  }}>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--cyan)', fontWeight: 700, display: 'block', marginBottom: 4 }}>
+                      🏢 por que isso importa
+                    </span>
+                    <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, color: 'rgba(0, 212, 255, 0.85)', lineHeight: 1.6, margin: 0 }}>
                       {mission.contexto_mercado}
                     </p>
-                    <div style={{ height: 1, background: 'var(--border)', marginBottom: 16 }} />
-                  </>
+                  </div>
                 )}
 
                 {/* Description */}
@@ -704,8 +837,11 @@ export default function MissionPage() {
 
                       {/* Missoes count or pending tag */}
                       {naoEntregou ? (
-                        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: 'var(--muted)', flexShrink: 0 }}>
-                          pendente
+                        <span style={{
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: 9, flexShrink: 0,
+                          color: diasRestantes <= 1 ? '#ef4444' : '#f59e0b',
+                        }}>
+                          {diasRestantes === 0 ? 'último dia' : `${diasRestantes}d`}
                         </span>
                       ) : (
                         <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--muted)', flexShrink: 0 }}>
@@ -718,6 +854,75 @@ export default function MissionPage() {
               </div>
             )}
           </div>
+
+          {/* ── Section 3: Activity Feed ──────────────────────────── */}
+          {feed.length > 0 && (
+            <div style={{ marginTop: 40 }}>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em',
+                marginBottom: 16,
+              }}>
+                // atividade do grupo
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {feed.map((ev, i) => {
+                  const tc = ev.trilha ? (TRILHA_COLOR[ev.trilha.toLowerCase()] ?? 'var(--muted)') : 'var(--muted)'
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 14px', borderRadius: 8,
+                        background: i === 0 ? 'rgba(0,255,148,0.03)' : 'transparent',
+                      }}
+                    >
+                      {/* Avatar */}
+                      {ev.avatar ? (
+                        <img src={ev.avatar} alt={ev.username} style={{ width: 28, height: 28, borderRadius: 7, flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 28, height: 28, borderRadius: 7, background: 'var(--bg2)', flexShrink: 0 }} />
+                      )}
+
+                      {/* Event content */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {ev.tipo === 'missao_concluida' ? (
+                          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, color: 'var(--text)' }}>
+                            <strong>{ev.username}</strong>
+                            <span style={{ color: 'var(--muted)' }}> completou </span>
+                            <span style={{ color: tc }}>{ev.titulo_missao}</span>
+                          </span>
+                        ) : (
+                          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: 13, color: 'var(--text)' }}>
+                            <strong>{ev.username}</strong>
+                            <span style={{ color: 'var(--muted)' }}> entrou no grupo</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* XP earned */}
+                      {ev.tipo === 'missao_concluida' && ev.xp > 0 && (
+                        <span style={{
+                          fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+                          color: 'var(--green)', flexShrink: 0,
+                        }}>
+                          +{ev.xp} XP
+                        </span>
+                      )}
+
+                      {/* Timestamp */}
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                        color: 'var(--muted)', flexShrink: 0,
+                      }}>
+                        {formatTimestamp(ev.timestamp)}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
         </main>
       </div>

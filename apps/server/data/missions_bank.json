@@ -114,6 +114,120 @@
     "prerequisito_id": "qual_004"
   },
   {
+    "id": "qual_007",
+    "trilha": "qualidade",
+    "nivel": 1,
+    "titulo": "Linter configurado com regras do time",
+    "descricao_template": "Configure ESLint (JS/TS) ou flake8/ruff (Python) no projeto com um conjunto de regras adequado para o time. O linter não deve reportar nenhum erro nos arquivos existentes após a configuração.",
+    "descricao_curta": "Linter configurado e sem erros no projeto",
+    "contexto_mercado": "Código sem linter é código sem padrão. Configurar análise estática é uma das primeiras tarefas em qualquer empresa que leva qualidade a sério — e é cobrado em code review desde o onboarding.",
+    "exemplo_commit_valido": "chore: add eslint with airbnb config and fix all existing warnings",
+    "criterios": {
+      "keywords_no_diff": ["eslint", "flake8", "ruff", ".eslintrc", "eslint.config", "pyproject.toml", "setup.cfg"],
+      "extensoes_aceitas": [".js", ".ts", ".json", ".yml", ".yaml", ".toml", ".cfg"],
+      "min_linhas_adicionadas": 8,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "qual_008",
+    "trilha": "qualidade",
+    "nivel": 2,
+    "titulo": "Snapshot testing em componentes UI",
+    "descricao_template": "Adicione testes de snapshot para pelo menos 3 componentes React/Vue do seu projeto. Os snapshots devem ser gerados e commitados junto com os testes.",
+    "descricao_curta": "Snapshot tests em 3 componentes frontend",
+    "contexto_mercado": "Testes de snapshot previnem regressões visuais silenciosas — aquela mudança de estilo que quebra outra tela sem ninguém perceber. Times de produto com alta velocidade de entrega dependem disso.",
+    "exemplo_commit_valido": "test: add snapshot tests for Button, Modal and Card components",
+    "criterios": {
+      "keywords_no_diff": ["toMatchSnapshot", "toMatchInlineSnapshot", "__snapshots__", "snapshot"],
+      "extensoes_aceitas": [".ts", ".tsx", ".js", ".jsx"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["javascript", "typescript", "react"],
+    "prerequisito_id": "qual_001"
+  },
+  {
+    "id": "qual_009",
+    "trilha": "qualidade",
+    "nivel": 2,
+    "titulo": "Property-based testing com Hypothesis",
+    "descricao_template": "Implemente pelo menos 2 testes baseados em propriedades usando Hypothesis (Python) ou fast-check (JS/TS) para uma função que recebe dados variáveis como datas, strings ou números.",
+    "descricao_curta": "Property-based tests com Hypothesis ou fast-check",
+    "contexto_mercado": "Property-based testing é o que times de alta maturidade usam para encontrar edge cases que testes unitários convencionais nunca pegariam. Aparece cada vez mais em entrevistas técnicas de nível pleno+.",
+    "exemplo_commit_valido": "test: add hypothesis property tests for price calculation\n- test commutativity and boundary values",
+    "criterios": {
+      "keywords_no_diff": ["hypothesis", "@given", "strategies", "fast-check", "fc.property", "Arbitrary"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_001"
+  },
+  {
+    "id": "qual_010",
+    "trilha": "qualidade",
+    "nivel": 3,
+    "titulo": "Mutation testing para validar qualidade dos testes",
+    "descricao_template": "Execute mutation testing no projeto usando mutmut (Python) ou Stryker (JS/TS). Analise o relatório, identifique mutantes sobreviventes e adicione testes para matar pelo menos 3 deles.",
+    "descricao_curta": "Mutation testing executado e mutantes eliminados",
+    "contexto_mercado": "Mutation testing é o nível mais avançado de validação de testes — ele prova que seus testes realmente detectam bugs, não apenas executam código. Engenheiros que dominam isso chegam a sênior mais rápido.",
+    "exemplo_commit_valido": "test: add tests to kill 5 surviving mutants found by mutmut",
+    "criterios": {
+      "keywords_no_diff": ["mutmut", "stryker", "mutation", "mutant", "killed"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".json"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_005"
+  },
+  {
+    "id": "qual_011",
+    "trilha": "qualidade",
+    "nivel": 1,
+    "titulo": "Formatador de código automatizado",
+    "descricao_template": "Configure Black (Python) ou Prettier (JS/TS) no projeto e aplique formatação automática em todos os arquivos existentes. Adicione script no package.json ou Makefile para rodar o formatador.",
+    "descricao_curta": "Formatador automático configurado no projeto",
+    "contexto_mercado": "Debates sobre formatação de código desperdiçam tempo de times inteiros. Formatadores automáticos eliminam esse problema e são esperados em qualquer projeto profissional moderno.",
+    "exemplo_commit_valido": "chore: add prettier and format all existing files\n- add .prettierrc, add format script to package.json",
+    "criterios": {
+      "keywords_no_diff": ["prettier", "black", ".prettierrc", "pyproject.toml", "format", "\"format\""],
+      "extensoes_aceitas": [".js", ".ts", ".json", ".toml", ".py"],
+      "min_linhas_adicionadas": 5,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "qual_012",
+    "trilha": "qualidade",
+    "nivel": 3,
+    "titulo": "Pre-commit hooks com lint e tests",
+    "descricao_template": "Configure pre-commit hooks que executam lint e testes antes de cada commit. Use husky (JS/TS) ou pre-commit framework (Python). O commit deve ser bloqueado se lint ou testes falharem.",
+    "descricao_curta": "Pre-commit hooks bloqueando commits com erro",
+    "contexto_mercado": "Pre-commit hooks são a última linha de defesa antes do código subir para o repositório. Times que os usam têm CI verde consistentemente. Times que não usam passam metade do tempo consertando pipeline.",
+    "exemplo_commit_valido": "chore: add husky pre-commit hooks for lint and tests\n- blocks commits if eslint or vitest fail",
+    "criterios": {
+      "keywords_no_diff": ["husky", "pre-commit", "lint-staged", ".husky", "pre-commit-config", "hooks"],
+      "extensoes_aceitas": [".js", ".ts", ".json", ".yml", ".yaml", ".toml"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "qual_007"
+  },
+  {
     "id": "devops_001",
     "trilha": "devops",
     "nivel": 1,
@@ -228,6 +342,120 @@
     "prerequisito_id": "devops_003"
   },
   {
+    "id": "devops_007",
+    "trilha": "devops",
+    "nivel": 1,
+    "titulo": ".dockerignore para imagem enxuta",
+    "descricao_template": "Adicione um arquivo .dockerignore ao projeto que exclua node_modules, __pycache__, .env, arquivos de teste e outros artefatos desnecessários da imagem Docker. Documente o impacto no tamanho da imagem.",
+    "descricao_curta": ".dockerignore configurado para imagem mais leve",
+    "contexto_mercado": "Imagens Docker sem .dockerignore chegam a ser 10x maiores que o necessário, aumentando tempo de build e custo de registry. Saber otimizar imagens é diferencial em qualquer processo seletivo DevOps.",
+    "exemplo_commit_valido": "chore: add .dockerignore to reduce image size\n- exclude node_modules, tests, .env, __pycache__",
+    "criterios": {
+      "keywords_no_diff": ["node_modules", "__pycache__", ".env", "*.test", "*.spec", ".git"],
+      "extensoes_aceitas": [".dockerignore"],
+      "min_linhas_adicionadas": 5,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript", "docker"],
+    "prerequisito_id": "devops_001"
+  },
+  {
+    "id": "devops_008",
+    "trilha": "devops",
+    "nivel": 2,
+    "titulo": "Health check endpoint para container",
+    "descricao_template": "Adicione um endpoint GET /health na API que retorna status do sistema (banco, dependências externas). Configure o HEALTHCHECK no Dockerfile para chamar esse endpoint periodicamente.",
+    "descricao_curta": "Health check endpoint + HEALTHCHECK no Dockerfile",
+    "contexto_mercado": "Containers sem health check em produção são bomba relógio — orquestradores como Kubernetes e ECS dependem disso para reiniciar instâncias doentes. É a primeira coisa que times de SRE verificam.",
+    "exemplo_commit_valido": "feat: add /health endpoint with db check and Dockerfile HEALTHCHECK",
+    "criterios": {
+      "keywords_no_diff": ["HEALTHCHECK", "/health", "health", "status", "ping", "db.execute", "connection"],
+      "extensoes_aceitas": ["Dockerfile", ".py", ".ts", ".js", ".yml"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript", "docker"],
+    "prerequisito_id": "devops_001"
+  },
+  {
+    "id": "devops_009",
+    "trilha": "devops",
+    "nivel": 2,
+    "titulo": "Matrix build para múltiplas versões",
+    "descricao_template": "Configure o GitHub Actions com matrix strategy para testar o projeto em pelo menos 2 versões diferentes da linguagem (Python 3.10 e 3.11, ou Node 18 e 20). Todos os jobs da matrix devem passar.",
+    "descricao_curta": "CI rodando em múltiplas versões com matrix build",
+    "contexto_mercado": "Compatibilidade entre versões é problema real em projetos que suportam múltiplos ambientes. Times de plataforma e bibliotecas open source dependem de matrix builds — saber configurar é diferencial em entrevistas DevOps.",
+    "exemplo_commit_valido": "ci: add matrix build for Python 3.10 and 3.11\n- both versions must pass tests",
+    "criterios": {
+      "keywords_no_diff": ["matrix:", "python-version:", "node-version:", "strategy:", "fail-fast:"],
+      "extensoes_aceitas": [".yml", ".yaml"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript", "github-actions"],
+    "prerequisito_id": "devops_003"
+  },
+  {
+    "id": "devops_010",
+    "trilha": "devops",
+    "nivel": 3,
+    "titulo": "Observabilidade com structured logging",
+    "descricao_template": "Substitua prints e logs não estruturados por structured logging usando structlog (Python) ou pino/winston (Node). Cada log deve incluir campos: timestamp, level, service, trace_id e a mensagem.",
+    "descricao_curta": "Structured logging com campos padronizados",
+    "contexto_mercado": "Logs sem estrutura são inúteis em sistemas distribuídos. Plataformas como Datadog, Grafana e ELK esperam JSON estruturado para correlacionar eventos entre serviços. Times de SRE dependem disso para investigar incidentes.",
+    "exemplo_commit_valido": "feat: migrate to structlog with JSON output\n- add trace_id, service name, structured fields to all logs",
+    "criterios": {
+      "keywords_no_diff": ["structlog", "pino", "winston", "json", "trace_id", "structured", "JSON.stringify"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "devops_011",
+    "trilha": "devops",
+    "nivel": 3,
+    "titulo": "Publicar imagem Docker no GitHub Container Registry",
+    "descricao_template": "Configure o GitHub Actions para buildar e publicar a imagem Docker automaticamente no GitHub Container Registry (ghcr.io) a cada push na branch main, com tag da versão e latest.",
+    "descricao_curta": "CI buildando e publicando imagem Docker no GHCR",
+    "contexto_mercado": "Publicar imagens Docker em um registry é o passo que conecta desenvolvimento e produção. Times que usam containers em produção fazem isso em todo merge — é pipeline padrão de DevOps.",
+    "exemplo_commit_valido": "ci: add Docker build and push to ghcr.io on main push\n- tag with commit SHA and latest",
+    "criterios": {
+      "keywords_no_diff": ["ghcr.io", "docker/build-push-action", "registry:", "GITHUB_TOKEN", "packages"],
+      "extensoes_aceitas": [".yml", ".yaml"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["docker", "github-actions"],
+    "prerequisito_id": "devops_005"
+  },
+  {
+    "id": "devops_012",
+    "trilha": "devops",
+    "nivel": 1,
+    "titulo": "Makefile com comandos de desenvolvimento",
+    "descricao_template": "Crie um Makefile na raiz do projeto com targets: make install, make dev, make test, make lint, make build. Cada target deve executar o comando correto para o tipo de projeto.",
+    "descricao_curta": "Makefile padronizando comandos do projeto",
+    "contexto_mercado": "Makefiles são o padrão universal para onboarding de novos devs. Um dev novo deve conseguir rodar 'make dev' e ter tudo funcionando em minutos — isso é o que diferencia projetos bem mantidos.",
+    "exemplo_commit_valido": "chore: add Makefile with install, dev, test and lint targets",
+    "criterios": {
+      "keywords_no_diff": ["install:", "dev:", "test:", "lint:", "build:", ".PHONY"],
+      "extensoes_aceitas": ["Makefile"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
     "id": "arq_001",
     "trilha": "arquitetura",
     "nivel": 1,
@@ -297,6 +525,158 @@
       "keywords_no_diff": ["def ", "function ", "const ", "helper", "util", "shared", "common"],
       "extensoes_aceitas": [".py", ".ts", ".js"],
       "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_005",
+    "trilha": "arquitetura",
+    "nivel": 1,
+    "titulo": "Configuração centralizada com pydantic-settings",
+    "descricao_template": "Substitua leituras avulsas de os.environ por uma classe de configuração centralizada usando pydantic-settings (Python) ou config module (TypeScript). Todas as variáveis de ambiente devem ser validadas na inicialização.",
+    "descricao_curta": "Classe de configuração centralizada e validada",
+    "contexto_mercado": "Configuração espalhada pelo código é causa frequente de bugs difíceis de reproduzir entre ambientes. Centralizar e validar configurações na inicialização é padrão obrigatório em projetos de produção.",
+    "exemplo_commit_valido": "refactor: add Settings class with pydantic-settings\n- validate all env vars on startup, fail fast on missing required vars",
+    "criterios": {
+      "keywords_no_diff": ["BaseSettings", "pydantic_settings", "Settings", "model_config", "env_file"],
+      "extensoes_aceitas": [".py", ".ts"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_006",
+    "trilha": "arquitetura",
+    "nivel": 2,
+    "titulo": "Implementar Repository Pattern para acesso a dados",
+    "descricao_template": "Crie uma camada de repositório que abstraia as queries de banco de dados de uma entidade do projeto (ex: UserRepository). A camada de serviço deve usar o repositório em vez de queries diretas.",
+    "descricao_curta": "Repository pattern implementado para uma entidade",
+    "contexto_mercado": "Repository pattern é o padrão que torna código testável sem banco real. Times que escalam dependem disso para trocar ORM, banco ou provider sem reescrever toda a lógica de negócio.",
+    "exemplo_commit_valido": "refactor: add UserRepository pattern\n- service uses repository interface, queries isolated in repository layer",
+    "criterios": {
+      "keywords_no_diff": ["Repository", "repository", "repo", "find_by", "find_all", "save(", "delete("],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "arq_001"
+  },
+  {
+    "id": "arq_007",
+    "trilha": "arquitetura",
+    "nivel": 2,
+    "titulo": "Adicionar paginação em endpoints de listagem",
+    "descricao_template": "Implemente paginação cursor-based ou offset-based em pelo menos 2 endpoints que retornam listas. A resposta deve incluir metadados: total, page, per_page, next_cursor ou has_next.",
+    "descricao_curta": "Paginação implementada em endpoints de listagem",
+    "contexto_mercado": "Endpoints de listagem sem paginação são bombas-relógio — funcionam no desenvolvimento mas explodem em produção com dados reais. Todo backend pleno sabe implementar isso corretamente.",
+    "exemplo_commit_valido": "feat: add cursor-based pagination to /users and /posts endpoints\n- returns total, next_cursor, has_next in response",
+    "criterios": {
+      "keywords_no_diff": ["page", "limit", "offset", "cursor", "per_page", "total", "skip", "take"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_008",
+    "trilha": "arquitetura",
+    "nivel": 3,
+    "titulo": "Implementar event-driven com fila de mensagens",
+    "descricao_template": "Adicione processamento assíncrono via fila de mensagens (Redis Queue, Celery, BullMQ ou similar) para pelo menos uma operação pesada ou não-crítica (ex: envio de email, processamento de imagem, notificação).",
+    "descricao_curta": "Fila de mensagens para processamento assíncrono",
+    "contexto_mercado": "Operações síncronas bloqueantes em rotas de API são causa número 1 de timeout em produção. Arquitetos e devs sênior separam operações pesadas em workers assíncronos — isso é cobrado em design de sistemas.",
+    "exemplo_commit_valido": "feat: add Celery worker for async email sending\n- route enqueues task, worker processes and sends email",
+    "criterios": {
+      "keywords_no_diff": ["celery", "queue", "worker", "task", "delay(", "enqueue", "bullmq", "redis"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "arq_006"
+  },
+  {
+    "id": "arq_009",
+    "trilha": "arquitetura",
+    "nivel": 3,
+    "titulo": "Implementar cache com Redis",
+    "descricao_template": "Adicione cache Redis em pelo menos um endpoint de leitura frequente. Implemente TTL adequado, invalidação de cache quando o dado mudar e logging de cache hit/miss.",
+    "descricao_curta": "Cache Redis em endpoint de leitura frequente",
+    "contexto_mercado": "Cache é o que separa sistemas que aguentam 10 usuários dos que aguentam 10.000. Saber quando e como cachear é habilidade de nível sênior — e aparece em toda entrevista de sistema distribuído.",
+    "exemplo_commit_valido": "feat: add Redis cache for /products endpoint\n- 5min TTL, invalidate on product update, log hit/miss",
+    "criterios": {
+      "keywords_no_diff": ["redis", "cache", "set(", "get(", "ttl", "expire", "invalidat", "CACHE_TTL"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_010",
+    "trilha": "arquitetura",
+    "nivel": 1,
+    "titulo": "Separar configuração por ambiente",
+    "descricao_template": "Organize as configurações do projeto em perfis de ambiente separados: development, test e production. Cada perfil deve ter suas próprias variáveis e o projeto deve carregar automaticamente o perfil correto via NODE_ENV ou APP_ENV.",
+    "descricao_curta": "Configurações separadas por ambiente (dev/test/prod)",
+    "contexto_mercado": "Usar a mesma configuração em dev e produção é uma das falhas mais comuns em projetos universitários. Separar ambientes é o primeiro passo para um projeto que pode ser entregue profissionalmente.",
+    "exemplo_commit_valido": "chore: add separate env configs for development, test and production\n- auto-load based on APP_ENV variable",
+    "criterios": {
+      "keywords_no_diff": [".env.development", ".env.test", ".env.production", "NODE_ENV", "APP_ENV", "environment"],
+      "extensoes_aceitas": [".env.development", ".env.test", ".env.production", ".env.example", ".py", ".ts"],
+      "min_linhas_adicionadas": 10,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "arq_011",
+    "trilha": "arquitetura",
+    "nivel": 3,
+    "titulo": "Implementar circuit breaker",
+    "descricao_template": "Adicione um circuit breaker em pelo menos uma integração com serviço externo usando tenacity (Python) ou opossum (Node). O circuito deve abrir após 3 falhas consecutivas e fechar após 30 segundos.",
+    "descricao_curta": "Circuit breaker em integração com serviço externo",
+    "contexto_mercado": "Circuit breaker é o padrão que evita que a falha de um serviço derrube o sistema inteiro. É um dos padrões de resiliência mais cobrados em entrevistas de arquitetura de microsserviços.",
+    "exemplo_commit_valido": "feat: add circuit breaker to payment gateway integration\n- opens after 3 failures, resets after 30s",
+    "criterios": {
+      "keywords_no_diff": ["circuit_breaker", "CircuitBreaker", "opossum", "tenacity", "OPEN", "CLOSED", "HALF_OPEN"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 25,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "arq_008"
+  },
+  {
+    "id": "arq_012",
+    "trilha": "arquitetura",
+    "nivel": 2,
+    "titulo": "Validação de input com schema",
+    "descricao_template": "Garanta que todos os endpoints de POST/PUT/PATCH validam o payload de entrada com um schema explícito usando Pydantic (Python), Zod (TS) ou Joi (JS). Payloads inválidos devem retornar 422 com mensagens descritivas.",
+    "descricao_curta": "Validação de input com schema em todos os endpoints de escrita",
+    "contexto_mercado": "Validação de input é a primeira linha de defesa contra bugs e ataques. Endpoints sem validação explícita são vulneráveis a dados inesperados que corrompem o banco ou expõem dados de outros usuários.",
+    "exemplo_commit_valido": "feat: add Pydantic schemas for all POST and PUT endpoints\n- return 422 with field-level error messages on invalid input",
+    "criterios": {
+      "keywords_no_diff": ["BaseModel", "pydantic", "zod", "Joi", "schema", "validate", "z.object"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
       "repo_pode_ser_novo": false
     },
     "pontos_base": 120,
@@ -378,5 +758,290 @@
     "pontos_base": 120,
     "tags_stack": ["python", "javascript", "typescript"],
     "prerequisito_id": null
+  },
+  {
+    "id": "integ_005",
+    "trilha": "integracao",
+    "nivel": 1,
+    "titulo": "Webhook receptor com validação de assinatura",
+    "descricao_template": "Crie um endpoint que recebe webhooks de uma plataforma externa (GitHub, Stripe, SendGrid etc.) e valida a assinatura HMAC antes de processar o payload. Retorne 400 para assinaturas inválidas.",
+    "descricao_curta": "Endpoint receptor de webhook com validação HMAC",
+    "contexto_mercado": "Webhooks sem validação de assinatura são vulneráveis a spoofing — qualquer pessoa pode enviar payloads falsos. Validar HMAC é o padrão da indústria e cobrado em toda integração séria com terceiros.",
+    "exemplo_commit_valido": "feat: add GitHub webhook receiver with HMAC signature validation\n- return 400 on invalid signature, process push events",
+    "criterios": {
+      "keywords_no_diff": ["webhook", "hmac", "HMAC", "sha256", "signature", "X-Hub-Signature", "digest"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_006",
+    "trilha": "integracao",
+    "nivel": 2,
+    "titulo": "Envio de email transacional",
+    "descricao_template": "Implemente envio de email transacional no projeto usando SendGrid, Resend, SES ou SMTP. O email deve ser enviado em resposta a um evento do sistema (cadastro, senha, notificação) e ter template HTML adequado.",
+    "descricao_curta": "Email transacional disparado por evento do sistema",
+    "contexto_mercado": "Envio de email transacional é feature presente em praticamente todo sistema B2C. Saber configurar um serviço de email com template e tratamento de bounce é habilidade cobrada em qualquer vaga full-stack.",
+    "exemplo_commit_valido": "feat: add welcome email on user registration using Resend\n- HTML template, async sending, error handling",
+    "criterios": {
+      "keywords_no_diff": ["sendgrid", "resend", "smtp", "nodemailer", "email", "send_mail", "MIMEText", "template"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".html"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_007",
+    "trilha": "integracao",
+    "nivel": 3,
+    "titulo": "Integração com pagamento (Stripe/Pagar.me)",
+    "descricao_template": "Implemente um fluxo básico de pagamento usando Stripe ou Pagar.me: criar intenção de pagamento, processar resposta e atualizar status no banco. O fluxo deve lidar com sucesso e falha de pagamento.",
+    "descricao_curta": "Fluxo de pagamento com Stripe ou Pagar.me",
+    "contexto_mercado": "Integração com gateway de pagamento é uma das features mais valorizadas em portfólio. Todo produto B2C precisa disso e poucas pessoas sabem implementar corretamente — quem sabe tem vantagem clara em entrevistas.",
+    "exemplo_commit_valido": "feat: add Stripe payment intent flow\n- create payment intent, handle success/failure webhook, update order status",
+    "criterios": {
+      "keywords_no_diff": ["stripe", "payment_intent", "PaymentIntent", "pagarme", "checkout", "charge", "webhook"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 30,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "integ_006"
+  },
+  {
+    "id": "integ_008",
+    "trilha": "integracao",
+    "nivel": 2,
+    "titulo": "SSE ou WebSocket para atualizações em tempo real",
+    "descricao_template": "Adicione comunicação em tempo real ao projeto usando Server-Sent Events (SSE) ou WebSocket. Pelo menos um evento deve ser emitido em resposta a mudança de dados no servidor (ex: novo item, status atualizado).",
+    "descricao_curta": "Atualizações em tempo real com SSE ou WebSocket",
+    "contexto_mercado": "Aplicações modernas exigem real-time. Saber escolher entre SSE e WebSocket e implementar corretamente é habilidade diferencial que aparece em vagas de produto desde o nível pleno.",
+    "exemplo_commit_valido": "feat: add SSE endpoint for real-time order status updates\n- client connects, server emits on status change",
+    "criterios": {
+      "keywords_no_diff": ["EventSource", "websocket", "WebSocket", "sse", "text/event-stream", "emit(", "on_message"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_009",
+    "trilha": "integracao",
+    "nivel": 1,
+    "titulo": "Upload de arquivo com validação",
+    "descricao_template": "Implemente upload de arquivo (imagem, PDF ou CSV) com validação de tipo MIME, tamanho máximo e sanitização do nome. Armazene no sistema de arquivos ou em object storage (S3, Supabase Storage, Cloudinary).",
+    "descricao_curta": "Upload de arquivo com validação de tipo e tamanho",
+    "contexto_mercado": "Upload sem validação é vetor de ataque clássico — arquivos maliciosos, path traversal, disco cheio. Saber implementar corretamente mostra que você pensa em segurança, não só em funcionalidade.",
+    "exemplo_commit_valido": "feat: add profile picture upload with MIME validation and S3 storage\n- max 5MB, accept only jpg/png/webp",
+    "criterios": {
+      "keywords_no_diff": ["upload", "multipart", "UploadFile", "FormData", "mimetype", "content_type", "file_size"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_010",
+    "trilha": "integracao",
+    "nivel": 3,
+    "titulo": "OAuth 2.0 com provedor externo",
+    "descricao_template": "Implemente autenticação OAuth 2.0 com um provedor externo (GitHub, Google, Discord). O fluxo deve incluir: redirect para autorização, callback com troca de código por token, fetch de perfil e criação/login de usuário.",
+    "descricao_curta": "Login social com OAuth 2.0 implementado do zero",
+    "contexto_mercado": "Implementar OAuth do zero — sem biblioteca mágica — é uma das demonstrações mais claras de entendimento de segurança web. Aparece em entrevistas de backend e full-stack de nível pleno+.",
+    "exemplo_commit_valido": "feat: implement Google OAuth 2.0 login flow from scratch\n- authorization redirect, callback handler, token exchange, user upsert",
+    "criterios": {
+      "keywords_no_diff": ["oauth", "OAuth", "authorization_code", "access_token", "redirect_uri", "state", "scope"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 35,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "integ_011",
+    "trilha": "integracao",
+    "nivel": 2,
+    "titulo": "Cache de resposta de API externa",
+    "descricao_template": "Adicione cache para respostas de uma API externa frequentemente consultada. O cache deve ter TTL adequado ao tipo de dado (ex: 5min para dados voláteis, 1h para dados estáveis) e ser invalidado quando necessário.",
+    "descricao_curta": "Cache de resposta de API externa com TTL",
+    "contexto_mercado": "Chamar APIs externas em toda requisição aumenta latência e pode gerar custos por request. Times experientes cacheiam agressivamente dados externos — é uma das otimizações mais impactantes e mais simples.",
+    "exemplo_commit_valido": "feat: add 10min Redis cache for GitHub API user data\n- invalidate on user profile update",
+    "criterios": {
+      "keywords_no_diff": ["cache", "redis", "ttl", "expire", "cached", "memcache", "lru_cache", "functools"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "integ_001"
+  },
+  {
+    "id": "testes_001",
+    "trilha": "testes",
+    "nivel": 1,
+    "titulo": "Setup de ambiente de testes isolado",
+    "descricao_template": "Configure um ambiente de testes completamente isolado do ambiente de desenvolvimento: banco de dados separado, variáveis de ambiente próprias e fixture de setup/teardown que limpa o estado entre testes.",
+    "descricao_curta": "Ambiente de testes com banco isolado e fixtures",
+    "contexto_mercado": "Testes que dependem de estado compartilhado são não-determinísticos — passam às vezes, falham às vezes. Times sérios exigem testes determinísticos. Configurar isolamento é a fundação de qualquer suite de testes confiável.",
+    "exemplo_commit_valido": "test: add isolated test environment with postgres test db\n- conftest.py with setup/teardown fixtures, .env.test",
+    "criterios": {
+      "keywords_no_diff": ["conftest", "fixture", "setup", "teardown", "TestClient", "pytest.fixture", "beforeEach", "afterEach"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".env.test"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": true
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "testes_002",
+    "trilha": "testes",
+    "nivel": 1,
+    "titulo": "Testes parametrizados",
+    "descricao_template": "Refatore testes repetitivos em testes parametrizados usando @pytest.mark.parametrize (Python) ou test.each (Jest/Vitest). Cubra pelo menos 5 casos de entrada diferentes com um único teste parametrizado.",
+    "descricao_curta": "Testes parametrizados com múltiplos casos de entrada",
+    "contexto_mercado": "Testes parametrizados eliminam a duplicação em suites de teste e tornam mais fácil adicionar novos casos. É uma prática básica que diferencia quem só escreve testes de quem sabe testar bem.",
+    "exemplo_commit_valido": "test: refactor price calculation tests to parametrized format\n- 6 test cases with @pytest.mark.parametrize",
+    "criterios": {
+      "keywords_no_diff": ["parametrize", "param", "test.each", "it.each", "describe.each", "@pytest.mark"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "testes_003",
+    "trilha": "testes",
+    "nivel": 2,
+    "titulo": "Teste de contrato entre serviços",
+    "descricao_template": "Escreva testes de contrato que validam que o contrato de API (request/response schema) entre dois módulos ou serviços não quebrou. Use Pact, schemathesis ou validação de schema manual.",
+    "descricao_curta": "Testes de contrato validando schema de API entre módulos",
+    "contexto_mercado": "Mudanças de contrato entre serviços são causa frequente de bugs em produção em sistemas distribuídos. Testes de contrato detectam isso antes do deploy — é prática obrigatória em times com microsserviços.",
+    "exemplo_commit_valido": "test: add contract tests between frontend and user API\n- validate response schema matches TypeScript types",
+    "criterios": {
+      "keywords_no_diff": ["contract", "pact", "schemathesis", "schema", "validate", "jsonschema", "zod.parse"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".json"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "testes_001"
+  },
+  {
+    "id": "testes_004",
+    "trilha": "testes",
+    "nivel": 2,
+    "titulo": "Teste E2E com Playwright ou Cypress",
+    "descricao_template": "Configure Playwright ou Cypress e escreva pelo menos 2 testes end-to-end que simulam um fluxo real do usuário: login, preenchimento de formulário ou navegação. Os testes devem rodar em CI.",
+    "descricao_curta": "2 testes E2E rodando com Playwright ou Cypress",
+    "contexto_mercado": "Testes E2E provam que o sistema funciona do ponto de vista do usuário real — não apenas que o código compila. Times que lançam features rápido sem quebrar dependem de uma suite E2E confiável.",
+    "exemplo_commit_valido": "test: add E2E tests for login and checkout flow with Playwright",
+    "criterios": {
+      "keywords_no_diff": ["playwright", "cypress", "test(", "page.goto", "cy.visit", "getByRole", "fill("],
+      "extensoes_aceitas": [".ts", ".js", ".spec.ts", ".spec.js"],
+      "min_linhas_adicionadas": 30,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["javascript", "typescript"],
+    "prerequisito_id": "testes_001"
+  },
+  {
+    "id": "testes_005",
+    "trilha": "testes",
+    "nivel": 2,
+    "titulo": "Teste de performance com locust ou k6",
+    "descricao_template": "Configure locust (Python) ou k6 (JS) e escreva um teste de carga simples para pelo menos 2 endpoints críticos. O teste deve simular 10 usuários simultâneos e gerar relatório com throughput e latência.",
+    "descricao_curta": "Teste de carga em 2 endpoints com locust ou k6",
+    "contexto_mercado": "Performance não é opcional em sistemas que vão crescer. Saber fazer um teste de carga básico é diferencial que aparece em entrevistas de backend sênior — e é a primeira coisa que SREs pedem antes de um lançamento.",
+    "exemplo_commit_valido": "test: add k6 load test for /api/products and /api/checkout\n- 10 VUs, 30s duration, p95 < 200ms target",
+    "criterios": {
+      "keywords_no_diff": ["locust", "k6", "http.get", "http.post", "vus:", "duration:", "task", "HttpUser"],
+      "extensoes_aceitas": [".py", ".js", ".ts", ".yml"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 120,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "testes_006",
+    "trilha": "testes",
+    "nivel": 1,
+    "titulo": "Test doubles: spy, stub e fake",
+    "descricao_template": "Refatore testes existentes para usar test doubles adequados: use spy para verificar chamadas, stub para controlar retornos e fake para substituir dependências externas. Cada técnica deve aparecer pelo menos uma vez.",
+    "descricao_curta": "Uso correto de spy, stub e fake em testes existentes",
+    "contexto_mercado": "Usar o test double certo para cada situação é o que diferencia testes bem escritos de testes que testam a implementação em vez do comportamento. É avaliado diretamente em code review de times sênior.",
+    "exemplo_commit_valido": "test: refactor email service tests using spies and stubs\n- spy on sendEmail, stub transport, fake SMTP server",
+    "criterios": {
+      "keywords_no_diff": ["spy", "stub", "fake", "mock", "jest.spyOn", "sinon", "MagicMock", "side_effect"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 20,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 80,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "testes_007",
+    "trilha": "testes",
+    "nivel": 3,
+    "titulo": "Testes de segurança com OWASP ZAP ou Bandit",
+    "descricao_template": "Execute análise de segurança automatizada no projeto usando Bandit (Python) ou npm audit + OWASP ZAP (Node/Web). Documente vulnerabilidades encontradas e corrija pelo menos 2 delas com testes de regressão.",
+    "descricao_curta": "Análise de segurança automatizada com OWASP/Bandit",
+    "contexto_mercado": "Security testing automatizado é requisito em empresas que processam dados sensíveis. Devs que sabem rodar e interpretar ferramentas de SAST/DAST têm vantagem clara em vagas com requisito de segurança.",
+    "exemplo_commit_valido": "security: run bandit scan and fix 3 high severity issues\n- fix SQL injection risk, hardcoded secret, insecure deserialization",
+    "criterios": {
+      "keywords_no_diff": ["bandit", "owasp", "zap", "npm audit", "security", "vulnerability", "CVE", "injection"],
+      "extensoes_aceitas": [".py", ".ts", ".js", ".yml", ".json"],
+      "min_linhas_adicionadas": 15,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": null
+  },
+  {
+    "id": "testes_008",
+    "trilha": "testes",
+    "nivel": 3,
+    "titulo": "TDD: feature desenvolvida test-first",
+    "descricao_template": "Implemente uma nova feature pequena usando TDD estrito: escreva o teste que falha primeiro, depois escreva o mínimo de código para passar, depois refatore. O commit deve mostrar essa progressão (red-green-refactor).",
+    "descricao_curta": "Feature implementada com TDD (red-green-refactor)",
+    "contexto_mercado": "TDD é uma disciplina que muda a forma de pensar sobre design de software. Devs que praticam TDD escrevem código mais testável naturalmente — é habilidade altamente valorizada em times de engenharia de excelência.",
+    "exemplo_commit_valido": "feat(tdd): implement discount calculation with test-first approach\n- red: failing test, green: minimal impl, refactor: clean code",
+    "criterios": {
+      "keywords_no_diff": ["test", "red", "green", "refactor", "failing", "assert", "expect"],
+      "extensoes_aceitas": [".py", ".ts", ".js"],
+      "min_linhas_adicionadas": 30,
+      "repo_pode_ser_novo": false
+    },
+    "pontos_base": 150,
+    "tags_stack": ["python", "javascript", "typescript"],
+    "prerequisito_id": "testes_001"
   }
 ]

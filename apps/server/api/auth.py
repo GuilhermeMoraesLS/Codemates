@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException
 from jose import jwt
 from datetime import datetime, timedelta
 import uuid
@@ -112,7 +112,7 @@ def _generate_individual_mission_bg(user_id: str, user_nivel: str) -> None:
 
 
 @router.post("/github/callback", response_model=AuthResponse)
-async def github_callback(body: GitHubCallbackRequest, background_tasks: BackgroundTasks):
+async def github_callback(body: GitHubCallbackRequest):
     """
     Exchange GitHub OAuth code for app JWT.
     Creates user if first login, triggers Profile Agent scan.
@@ -134,12 +134,16 @@ async def github_callback(body: GitHubCallbackRequest, background_tasks: Backgro
     github_id = gh_user["id"]
     username = gh_user["login"]
     avatar = gh_user.get("avatar_url")
+    email = gh_user.get("email") or ""
 
     # 3. Upsert user in DB
     existing = db.table("users").select("*").eq("github_id", github_id).execute()
 
     if existing.data:
         user = existing.data[0]
+        # Keep avatar, email and github_token up to date
+        db.table("users").update({"avatar": avatar, "email": email}).eq("id", user["id"]).execute()
+        db.table("github_profiles").update({"github_token": github_token}).eq("user_id", user["id"]).execute()
     else:
         # New user — create record
         new_user = {
@@ -147,6 +151,7 @@ async def github_callback(body: GitHubCallbackRequest, background_tasks: Backgro
             "github_id": github_id,
             "username": username,
             "avatar": avatar,
+            "email": email,
             "streak_atual": 0,
             "pontos_total": 0,
             "nivel": "INICIANTE",
@@ -161,6 +166,7 @@ async def github_callback(body: GitHubCallbackRequest, background_tasks: Backgro
             profile_data = run_profile_agent(username, github_token)
             db.table("github_profiles").upsert({
                 "user_id": user["id"],
+                "github_token": github_token,
                 "linguagens_json": profile_data.get("linguagens_json", {}),
                 "frameworks_json": profile_data.get("frameworks_json", []),
                 "nivel_mercado": profile_data.get("nivel_mercado"),
@@ -173,9 +179,6 @@ async def github_callback(body: GitHubCallbackRequest, background_tasks: Backgro
             }).execute()
         except Exception as e:
             logger.error(f"[profile_agent] falhou para {username}: {type(e).__name__}: {e}")
-
-    # 5. Schedule individual mission generation (non-blocking, runs after response)
-    background_tasks.add_task(_generate_individual_mission_bg, user["id"], user["nivel"])
 
     # 6. Issue JWT
     token = create_jwt(user["id"])
@@ -190,5 +193,39 @@ async def github_callback(body: GitHubCallbackRequest, background_tasks: Backgro
             pontos_total=user["pontos_total"],
             nivel=user["nivel"],
             missoes_concluidas=user["missoes_concluidas"],
+            plano=user.get("plano", "free"),
         ),
     )
+
+
+# ── Pro upgrade ────────────────────────────────────────────────
+from fastapi import Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from jose import JWTError
+
+_security = HTTPBearer()
+
+
+def _get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(_security)) -> str:
+    s = get_settings()
+    try:
+        payload = jwt.decode(credentials.credentials, s.server_secret_key, algorithms=["HS256"])
+        return payload["sub"]
+    except JWTError:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+
+@router.post("/upgrade-pro")
+async def upgrade_to_pro(user_id: str = Depends(_get_current_user_id)):
+    """
+    Upgrade the authenticated user to Plano Pro.
+    In production this would be gated behind a Stripe payment confirmation.
+    For now, it directly sets plano='pro'.
+    """
+    db = get_supabase()
+    result = db.table("users").update({"plano": "pro"}).eq("id", user_id).execute()
+    if not result.data:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    return {"message": "Plano Pro ativado!", "plano": "pro"}

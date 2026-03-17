@@ -262,3 +262,52 @@ GROUP BY gm.group_id, gm.user_id, u.username, u.avatar,
 -- in the background task that generates individual missions on login.
 ALTER TABLE missions ALTER COLUMN group_id DROP NOT NULL;
 
+-- ============================================================
+-- MIGRATION v6 — user email + github_token storage
+-- ============================================================
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS email text NOT NULL DEFAULT '';
+
+ALTER TABLE github_profiles
+  ADD COLUMN IF NOT EXISTS github_token text DEFAULT '';
+
+-- MIGRATION v7 — achievement_definitions and user_achievements
+-- (see apps/server/docs/migration_v7.sql if this block was applied separately)
+
+-- MIGRATION v8 — market_missions table
+CREATE TABLE IF NOT EXISTS market_missions (
+  id            uuid primary key default uuid_generate_v4(),
+  semana_ref    text not null,
+  trilha        text not null,
+  titulo        text not null,
+  descricao     text not null,
+  contexto_mercado text not null,
+  exemplo_commit text not null,
+  criterios     jsonb not null default '{}',
+  pontos        int not null default 200,
+  nivel         int not null default 2,
+  created_at    timestamptz not null default now(),
+  unique(semana_ref)
+);
+
+-- users who accepted this week's market mission
+CREATE TABLE IF NOT EXISTS market_mission_acceptances (
+  id              uuid primary key default uuid_generate_v4(),
+  market_mission_id uuid not null references market_missions(id) on delete cascade,
+  user_id         uuid not null references users(id) on delete cascade,
+  semana_ref      text not null,
+  entregue        boolean not null default false,
+  entregue_em     timestamptz,
+  pontos_ganhos   int,
+  commit_url      text,
+  created_at      timestamptz not null default now(),
+  unique(market_mission_id, user_id)
+);
+
+ALTER TABLE market_missions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE market_mission_acceptances ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public read market_missions" ON market_missions FOR SELECT USING (true);
+CREATE POLICY "service manage market_missions" ON market_missions USING (true) WITH CHECK (true);
+CREATE POLICY "users read own acceptances" ON market_mission_acceptances FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "service manage acceptances" ON market_mission_acceptances USING (true) WITH CHECK (true);

@@ -31,6 +31,8 @@ def run_mission_agent(
     group: dict,
     mission_history: list,
     user_nivel: str,
+    trilha_preferida: str = "",
+    plano: str = "free",
 ) -> dict:
     """
     Select and personalize a weekly mission for a group member.
@@ -46,6 +48,9 @@ def run_mission_agent(
         exemplo_commit, criterios, pontos, trilha, nivel
     """
     bank = _load_bank()
+    # Free plan: restrict to nivel 1-2 missions only
+    if plano != "pro":
+        bank = [m for m in bank if m.get("nivel", 1) <= 2]
 
     context = {
         "perfil_membro": {
@@ -62,6 +67,7 @@ def run_mission_agent(
         },
         "historico_missoes": mission_history,
         "nivel_usuario": user_nivel,
+        "trilha_preferida": trilha_preferida,  # "" = livre escolha do agente
         "banco_missoes": bank,
     }
 

@@ -17,13 +17,15 @@ Remove from candidates any mission whose `id` is already in `historico_missoes`.
 
 ## Rule 2 — Prioritize weak areas
 Check `areas_a_fortalecer` in the member profile. Apply this mapping to prioritize trilhas:
-- "testes automatizados" → prioritize trilha "qualidade"
+- "testes automatizados" → prioritize trilha "testes" or "qualidade"
 - "CI/CD e automação de deploy" → prioritize trilha "devops"
 - "containerização com Docker" → prioritize trilha "devops"
 - "documentação técnica" → prioritize trilha "arquitetura"
 - "persistência e modelagem de dados" → prioritize trilha "integracao"
+- "qualidade de código" → prioritize trilha "qualidade"
 
-If `areas_a_fortalecer` is empty, pick evenly across all trilhas.
+If `trilha_preferida` is set, use that trilha first (overrides `areas_a_fortalecer`).
+If `areas_a_fortalecer` is empty and `trilha_preferida` is not set, pick evenly across all trilhas.
 
 ## Rule 3 — Respect the level
 Map user level to allowed mission levels:
